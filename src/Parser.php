@@ -102,7 +102,9 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntil('{');
+        while ($this->current() && $this->current() !== '{' && $this->current(3) !== "<x-") {
+            $this->consume();
+        }
 
         $content = substr($this->template, $start, $this->index - $start);
 

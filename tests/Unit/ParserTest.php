@@ -287,6 +287,24 @@ test('parses a self closing component tag', function () {
     ]);
 });
 
+test('parses component after line break', function () {
+    $template = "\n<x-component></x-component>";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => "\n"
+        ],
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => []
+        ]
+    ]);
+});
+
 test('parses a self closing component tag mixed with content', function () {
     $template = '<x-component />Hello, world!';
     $parser = new Parser($template);
@@ -414,7 +432,6 @@ test('parses nested components of the same name', function () {
         ]
     ]);
 });
-
 
 test('parses component with spaces before closing bracket', function () {
     $template = '<x-component></x-component    >';
