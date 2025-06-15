@@ -102,9 +102,7 @@ class Parser
     {
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '{' && $this->current(3) !== "<x-" && $this->current() !== "@") {
-            $this->consume();
-        }
+        $this->consumeUntilAny(['{', '<x-', '@']);
 
         $content = substr($this->template, $start, $this->index - $start);
 
@@ -176,9 +174,7 @@ class Parser
     {
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '>' && $this->current() !== ' ' && $this->current(2) !== '/>') {
-            $this->consume();
-        }
+        $this->consumeUntilAny(['>', ' ', '/>']);
 
         return substr($this->template, $start, $this->index - $start);
     }
@@ -212,11 +208,23 @@ class Parser
         return $content;
     }
 
+    /**
+     * Returns the current character(s) in the template
+     * 
+     * @param int $length The length of the current character
+     * @return string
+     */
     private function current(int $length = 1): string
     {
         return substr($this->template, $this->index, $length);
     }
 
+    /**
+     * Returns the previous character(s) in the template
+     * 
+     * @param int $length The length of the previous character
+     * @return string
+     */
     private function previous(int $length = 1): string
     {
         if ($this->index - $length < 0) {
@@ -242,6 +250,25 @@ class Parser
     }
 
     /**
+     * Consumes the template until any of the given tokens is found
+     * 
+     * @param array $tokens The tokens to consume until
+     * @return void
+     */
+    private function consumeUntilAny(array $tokens): void
+    {
+        while ($this->current()) {
+            foreach ($tokens as $token) {
+                if ($this->current(strlen($token)) === $token) {
+                    return;
+                }
+            }
+
+            $this->consume();
+        }
+    }
+
+    /**
      * Consumes the template until the given token is found, including the token
      * 
      * @param string $token The token to consume until
@@ -253,6 +280,12 @@ class Parser
         $this->consume(strlen($token));
     }
 
+    /**
+     * Consumes the template by the given length
+     * 
+     * @param int $length The length to consume
+     * @return void
+     */
     private function consume(int $length = 1): void
     {
         $this->index += $length;
