@@ -6,6 +6,7 @@ class Parser
 {
     const VERBATIM = 'verbatim';
     const INTERPOLATION = 'interpolation';
+    const DIRECTIVE = 'directive';
 
     private int $index = 0;
     private string $template;
@@ -23,6 +24,8 @@ class Parser
         while ($this->index < strlen($this->template)) {
             if ($this->current() === '{' && $this->peak() === '{') {
                 $this->parseInterpolation();
+            } else if ($this->current() === '@') {
+                $this->parseDirective();
             } else {
                 $this->parseVerbatim();
             }
@@ -50,6 +53,30 @@ class Parser
         $this->tokens[] = [
             'type' => self::INTERPOLATION,
             'content' => $content
+        ];
+    }
+
+    private function parseDirective(): void
+    {
+        $this->consume();
+
+        $parameters = '';
+        $start = $this->index;
+
+        while ($this->current() && $this->current() !== "\n" && $this->current() !== '(') {
+            $this->consume();
+        }
+
+        $name = substr($this->template, $start, $this->index - $start);
+
+        if ($this->current() === '(') {
+            $parameters = $this->consumeParenthesesContent();
+        }
+
+        $this->tokens[] = [
+            'type' => self::DIRECTIVE,
+            'name' => trim($name),
+            'parameters' => $parameters
         ];
     }
 
@@ -83,6 +110,22 @@ class Parser
         $this->consume();
     }
 
+    private function consumeParenthesesContent(): string
+    {
+        $this->consume();
+        $start = $this->index;
+
+        while ($this->current() && $this->current() !== ')') {
+            $this->consume();
+        }
+
+        $content = substr($this->template, $start, $this->index - $start);
+
+        $this->consume();
+
+        return trim($content);
+    }
+
     private function current(): string
     {
         return $this->template[$this->index] ?? '';
@@ -96,5 +139,12 @@ class Parser
     private function consume(int $length = 1): void
     {
         $this->index += $length;
+    }
+
+    private function consumeIf(string $condition): void
+    {
+        if ($this->current() === $condition) {
+            $this->consume();
+        }
     }
 }
