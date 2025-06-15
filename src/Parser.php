@@ -20,9 +20,7 @@ class Parser
 
     public function parse(): array
     {
-        $this->tokens = [];
-
-        while ($this->index < strlen($this->template)) {
+        while ($this->current()) {
             $this->tokens[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
                 $this->current(2) === '{{' => $this->parseInterpolation(),
