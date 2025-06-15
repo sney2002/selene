@@ -23,7 +23,7 @@ class Parser
         $this->tokens = [];
 
         while ($this->index < strlen($this->template)) {
-            if ($this->current() === '{' && $this->peak() === '{') {
+            if ($this->current() === '{' && $this->peek() === '{') {
                 $this->parseInterpolation();
             } else if ($this->current() === '@') {
                 $this->parseDirective();
@@ -37,7 +37,7 @@ class Parser
 
     private function parseInterpolation(): void
     {
-        if ($this->peak(4) === '{{--') {
+        if ($this->peek(4) === '{{--') {
             $this->parseComment();
             return;
         }
@@ -92,7 +92,7 @@ class Parser
 
         $start = $this->index;
 
-        while ($this->current() && $this->peak(4) !== '--}}') {
+        while ($this->current() && $this->peek(4) !== '--}}') {
             $this->consume();
         }
 
@@ -165,7 +165,7 @@ class Parser
         return $this->template[$this->index] ?? '';
     }
 
-    private function peak(int $length = 1): string
+    private function peek(int $length = 1): string
     {
         if ($length > 1) {
             return substr($this->template, $this->index, $this->index + $length);
