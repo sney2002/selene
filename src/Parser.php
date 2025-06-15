@@ -12,7 +12,7 @@ class Parser
 
     private int $index = 0;
     private string $template;
-    private array $tokens;
+    private array $tokens = [];
 
     public function __construct(string $template)
     {
@@ -165,17 +165,41 @@ class Parser
         }
 
         $name = substr($this->template, $start, $this->index - $start);
-        
+
+        $isSelfClosing = $this->current(2) === '/>';
+
+        while ($this->current() && $this->current() !== '>' && !$isSelfClosing) {
+            $this->consume();
+        }
+
+        $this->consume();
+
+        $content = $isSelfClosing ? '' : $this->getComponentContent($name);
+
+        return [
+            'type' => self::COMPONENT,
+            'name' => $name,
+            'children' => (new self($content))->parse()
+        ];
+    }
+
+    private function getComponentContent(string $name): string
+    {
+        $start = $this->index;
+
+        while ($this->current() && $this->current(4 + strlen($name) + 1) !== '</x-' . $name . '>') {
+            $this->consume();
+        }
+
+        $content = substr($this->template, $start, $this->index - $start);
+
         while ($this->current() && $this->current() !== '>') {
             $this->consume();
         }
 
         $this->consume();
 
-        return [
-            'type' => self::COMPONENT,
-            'name' => $name
-        ];
+        return $content;
     }
 
     private function current(int $length = 1): string
