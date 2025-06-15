@@ -3,14 +3,35 @@
 use Selene\Parser;
 
 test('parses a verbatim string', function () {
-    $parser = new Parser();
     $template = 'Hello, world!';
-    $result = $parser->parse($template);
+    $parser = new Parser($template);
+    $result = $parser->parse();
 
     expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, world!'
+        ]
+    ]);
+});
+
+test('parses a template with a single interpolation', function () {
+    $template = 'Hello, {{ name }}!';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => 'Hello, '
+        ],
+        [
+            'type' => Parser::INTERPOLATION,
+            'content' => '{{ name }}'
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => '!'
         ]
     ]);
 });
