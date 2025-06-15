@@ -166,6 +166,7 @@ class Parser
         return [
             'type' => self::COMPONENT,
             'name' => $name,
+            'attributes' => [],
             'children' => (new self($content))->parse()
         ];
     }
