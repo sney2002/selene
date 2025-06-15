@@ -230,3 +230,31 @@ test('parses directives with nested parentheses', function () {
         ]
     ]);
 });
+
+test('parses directives with parentheses inside single quotes', function () {
+    $template = "@if(')')";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => "')'"
+        ]
+    ]);
+});
+
+test('parses directives with parentheses inside double quotes', function () {
+    $template = '@if(")")';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => '")"'
+        ]
+    ]);
+});

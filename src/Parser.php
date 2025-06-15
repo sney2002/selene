@@ -117,6 +117,10 @@ class Parser
         $level = 1;
 
         while ($this->current() && $level > 0) {
+            if ($this->current() === '"' || $this->current() === "'") {
+                $this->consumeString();
+            }
+
             if ($this->current() === '(') {
                 $level++;
             } else if ($this->current() === ')') {
