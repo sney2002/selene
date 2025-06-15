@@ -490,3 +490,19 @@ test('parses component with spaces before closing bracket', function () {
     ]);
 });
 
+test('parses component with attribute', function () {
+    $template = '<x-component name="John" />';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toEqualCanonicalizing([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'attributes' => [
+                'name' => 'John'
+            ],
+            'children' => []
+        ]
+    ]);
+});

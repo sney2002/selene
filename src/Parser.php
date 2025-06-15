@@ -42,7 +42,7 @@ class Parser
 
         while ($this->current() && $this->current(2) !== '}}') {
             if ($this->current() === '"' || $this->current() === "'") {
-                $this->consumeString();
+                $this->getString();
             }
             $this->consume();
         }
@@ -112,19 +112,26 @@ class Parser
         ];
     }
 
-    private function consumeString(): void
+    private function getString(): string
     {
         $quote = $this->current();
 
         $this->consume();
         
+        $start = $this->index;
+
         while ($this->current() && $this->current() !== $quote) {
             if ($this->current() === '\\') {
                 $this->consume();
             }
             $this->consume();
         }
+
+        $string = substr($this->template, $start, $this->index - $start);
+
         $this->consume();
+
+        return $string;
     }
 
     private function consumeParenthesesContent(): string
@@ -135,7 +142,7 @@ class Parser
 
         while ($this->current() && $level > 0) {
             if ($this->current() === '"' || $this->current() === "'") {
-                $this->consumeString();
+                $this->getString();
             }
 
             if ($this->current() === '(') {
@@ -157,6 +164,8 @@ class Parser
 
         $name = $this->getOpeningTagName();
 
+        $attributes = $this->getComponentAttributes();
+
         $this->consumeUntilIncluding('>');
 
         $isSelfClosing = $this->previous(2) === '/>';
@@ -166,7 +175,7 @@ class Parser
         return [
             'type' => self::COMPONENT,
             'name' => $name,
-            'attributes' => [],
+            'attributes' => $attributes,
             'children' => (new self($content))->parse()
         ];
     }
@@ -178,6 +187,49 @@ class Parser
         $this->consumeUntilAny(['>', ' ', '/>']);
 
         return substr($this->template, $start, $this->index - $start);
+    }
+
+    private function getComponentAttributes(): array
+    {
+        $attributes = [];
+
+        while ($this->current()) {
+            if ($this->current() === '>' || $this->current(2) === '/>') {
+                break;
+            }
+
+            if ($this->current() === ' ') {
+                $this->consume();
+                continue;
+            }
+
+            $name = $this->getComponentAttributeName();
+            $value = '';
+
+            if ($this->current() === '=') {
+                $value = $this->getComponentAttributeValue();
+            }
+
+            $attributes[$name] = $value;
+        }
+
+        return $attributes;
+    }
+
+    private function getComponentAttributeName(): string
+    {
+        $start = $this->index;
+
+        $this->consumeUntilAny(['=', ' ']);
+
+        return substr($this->template, $start, $this->index - $start);
+    }
+
+    private function getComponentAttributeValue(): string
+    {
+        $this->consume();
+
+        return $this->getString();
     }
 
     private function getComponentContent(string $name): string
