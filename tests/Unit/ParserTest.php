@@ -135,6 +135,24 @@ test('parses a directive', function () {
     ]);
 });
 
+test('parses a directive after line break', function () {
+    $template = "\n@if";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+    
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => "\n"
+        ],
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => ''
+        ],
+    ]);
+});
+
 test('parses a directive with a space', function () {
     $template = '@if ';
     $parser = new Parser($template);
@@ -271,7 +289,6 @@ test('parses blade comments', function () {
         ]
     ]);
 });
-
 
 test('parses a self closing component tag', function () {
     $template = '<x-component />';

@@ -102,7 +102,7 @@ class Parser
     {
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '{' && $this->current(3) !== "<x-") {
+        while ($this->current() && $this->current() !== '{' && $this->current(3) !== "<x-" && $this->current() !== "@") {
             $this->consume();
         }
 
