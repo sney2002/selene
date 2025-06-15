@@ -287,6 +287,20 @@ test('parses a self closing component tag', function () {
     ]);
 });
 
+test('parses a self closing component without spaces', function () {
+    $template = '<x-component/>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+    
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => []
+        ]
+    ]);
+});
+
 test('parses component after line break', function () {
     $template = "\n<x-component></x-component>";
     $parser = new Parser($template);

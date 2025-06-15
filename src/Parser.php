@@ -176,7 +176,7 @@ class Parser
     {
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '>' && $this->current() !== ' ') {
+        while ($this->current() && $this->current() !== '>' && $this->current() !== ' ' && $this->current(2) !== '/>') {
             $this->consume();
         }
 
