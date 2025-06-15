@@ -346,3 +346,28 @@ test('parses a component with html content', function () {
         ]
     ]);
 });
+
+test('parses nested components', function () {
+    $template = '<x-component><x-child>Hello, world!</x-child></x-component>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => [
+                [
+                    'type' => Parser::COMPONENT,
+                    'name' => 'child',
+                    'children' => [
+                        [
+                            'type' => Parser::VERBATIM,
+                            'content' => 'Hello, world!'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+});
