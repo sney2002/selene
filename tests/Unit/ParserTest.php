@@ -371,3 +371,17 @@ test('parses nested components', function () {
         ]
     ]);
 });
+
+test('parses component with spaces before closing bracket', function () {
+    $template = '<x-component></x-component    >';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => []
+        ]
+    ]);
+});

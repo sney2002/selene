@@ -186,8 +186,9 @@ class Parser
     private function getComponentContent(string $name): string
     {
         $start = $this->index;
+        $closingTagLength = 4 + strlen($name);
 
-        while ($this->current() && $this->current(4 + strlen($name) + 1) !== '</x-' . $name . '>') {
+        while ($this->current() && $this->current($closingTagLength) !== '</x-' . $name) {
             $this->consume();
         }
 
