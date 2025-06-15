@@ -216,3 +216,17 @@ test('parses directives line breaks inside parentheses', function () {
         ]
     ]);
 });
+
+test('parses directives with nested parentheses', function () {
+    $template = "@if((\$condition))";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => "(\$condition)"
+        ]
+    ]);
+});

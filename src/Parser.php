@@ -114,14 +114,18 @@ class Parser
     {
         $this->consume();
         $start = $this->index;
+        $level = 1;
 
-        while ($this->current() && $this->current() !== ')') {
+        while ($this->current() && $level > 0) {
+            if ($this->current() === '(') {
+                $level++;
+            } else if ($this->current() === ')') {
+                $level--;
+            }
             $this->consume();
         }
 
-        $content = substr($this->template, $start, $this->index - $start);
-
-        $this->consume();
+        $content = substr($this->template, $start, $this->index - $start - 1);
 
         return trim($content);
     }
