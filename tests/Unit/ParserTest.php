@@ -300,3 +300,30 @@ test('parses an empty component tag', function () {
         ]
     ]);
 });
+
+test('parses a component with content', function () {
+    $template = '<x-component>Hello, {{ $name }}!</x-component>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => [
+                [
+                    'type' => Parser::VERBATIM,
+                    'content' => 'Hello, '
+                ],
+                [
+                    'type' => Parser::INTERPOLATION,
+                    'content' => ' $name '
+                ],
+                [
+                    'type' => Parser::VERBATIM,
+                    'content' => '!'
+                ]
+            ]
+        ]
+    ]);
+});
