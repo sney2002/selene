@@ -86,9 +86,7 @@ class Parser
 
         $start = $this->index;
 
-        while ($this->current() && $this->current(4) !== '--}}') {
-            $this->consume();
-        }
+        $this->consumeUntil('--}}');
 
         $comment = substr($this->template, $start, $this->index - $start);
 
@@ -103,10 +101,8 @@ class Parser
     private function parseVerbatim(): array
     {
         $start = $this->index;
-        
-        while ($this->current() && $this->current() !== '{') {
-            $this->consume();
-        }
+
+        $this->consumeUntil('{');
 
         $content = substr($this->template, $start, $this->index - $start);
 
@@ -121,6 +117,7 @@ class Parser
         $quote = $this->current();
 
         $this->consume();
+        
         while ($this->current() && $this->current() !== $quote) {
             if ($this->current() === '\\') {
                 $this->consume();
@@ -162,11 +159,7 @@ class Parser
 
         $isSelfClosing = $this->current(2) === '/>';
 
-        while ($this->current() && $this->current() !== '>') {
-            $this->consume();
-        }
-
-        $this->consume();
+        $this->consumeUntilIncluding('>');
 
         $content = $isSelfClosing ? '' : $this->getComponentContent($name);
 
@@ -212,11 +205,7 @@ class Parser
 
         $content = substr($this->template, $start, $this->index - $start);
 
-        while ($this->current() && $this->current() !== '>') {
-            $this->consume();
-        }
-
-        $this->consume();
+        $this->consumeUntilIncluding('>');
 
         return $content;
     }
@@ -226,15 +215,35 @@ class Parser
         return substr($this->template, $this->index, $length);
     }
 
+    /**
+     * Consumes the template until the given token is found
+     * 
+     * @param string $token The token to consume until
+     * @return void
+     */
+    private function consumeUntil(string $token): void
+    {
+        $tokenLength = strlen($token);
+
+        while ($this->current() && $this->current($tokenLength) !== $token) {
+            $this->consume();
+        }
+    }
+
+    /**
+     * Consumes the template until the given token is found, including the token
+     * 
+     * @param string $token The token to consume until
+     * @return void
+     */
+    private function consumeUntilIncluding(string $token): void
+    {
+        $this->consumeUntil($token);
+        $this->consume(strlen($token));
+    }
+
     private function consume(int $length = 1): void
     {
         $this->index += $length;
-    }
-
-    private function consumeIf(string $condition): void
-    {
-        if ($this->current() === $condition) {
-            $this->consume();
-        }
     }
 }
