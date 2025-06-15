@@ -74,6 +74,10 @@ class Parser
 
         $this->consume();
         while ($this->current() && $this->current() !== $quote) {
+            if ($this->current() === '\\') {
+                $this->consume();
+            }
+
             $this->consume();
         }
         $this->consume();
