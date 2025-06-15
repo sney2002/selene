@@ -258,3 +258,16 @@ test('parses directives with parentheses inside double quotes', function () {
         ]
     ]);
 });
+
+test('parses blade comments', function () {
+    $template = '{{-- blade comment --}}';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMMENT,
+            'content' => ' blade comment '
+        ]
+    ]);
+});

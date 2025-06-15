@@ -7,6 +7,7 @@ class Parser
     const VERBATIM = 'verbatim';
     const INTERPOLATION = 'interpolation';
     const DIRECTIVE = 'directive';
+    const COMMENT = 'comment';
 
     private int $index = 0;
     private string $template;
@@ -36,7 +37,13 @@ class Parser
 
     private function parseInterpolation(): void
     {
+        if ($this->peak(4) === '{{--') {
+            $this->parseComment();
+            return;
+        }
+
         $this->consume(2);
+
         $start = $this->index;
 
         while ($this->current() && $this->current() !== '}') {
@@ -77,6 +84,25 @@ class Parser
             'type' => self::DIRECTIVE,
             'name' => trim($name),
             'parameters' => $parameters
+        ];
+    }
+
+    private function parseComment(): void {
+        $this->consume(4);
+
+        $start = $this->index;
+
+        while ($this->current() && $this->peak(4) !== '--}}') {
+            $this->consume();
+        }
+
+        $comment = substr($this->template, $start, $this->index - $start);
+
+        $this->consume(4);
+
+        $this->tokens[] = [
+            'type' => self::COMMENT,
+            'content' => $comment
         ];
     }
 
@@ -139,9 +165,13 @@ class Parser
         return $this->template[$this->index] ?? '';
     }
 
-    private function peak(int $offset = 1): string
+    private function peak(int $length = 1): string
     {
-        return $this->template[$this->index + $offset] ?? '';
+        if ($length > 1) {
+            return substr($this->template, $this->index, $this->index + $length);
+        }
+
+        return $this->template[$this->index] ?? '';
     }
 
     private function consume(int $length = 1): void
