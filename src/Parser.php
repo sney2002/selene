@@ -8,6 +8,7 @@ class Parser
     const INTERPOLATION = 'interpolation';
     const DIRECTIVE = 'directive';
     const COMMENT = 'comment';
+    const COMPONENT = 'component';
 
     private int $index = 0;
     private string $template;
@@ -23,6 +24,7 @@ class Parser
         while ($this->current()) {
             $this->tokens[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
+                $this->current(3) === '<x-' => $this->parseComponent(),
                 $this->current(2) === '{{' => $this->parseInterpolation(),
                 $this->current() === '@' => $this->parseDirective(),
                 default => $this->parseVerbatim(),
@@ -150,6 +152,30 @@ class Parser
         $content = substr($this->template, $start, $this->index - $start - 1);
 
         return trim($content);
+    }
+
+    private function parseComponent(): array
+    {
+        $this->consume(3);
+
+        $start = $this->index;
+
+        while ($this->current() && $this->current() !== '>' && $this->current() !== '/>' && $this->current() !== ' ') {
+            $this->consume();
+        }
+
+        $name = substr($this->template, $start, $this->index - $start);
+        
+        while ($this->current() && $this->current() !== '>') {
+            $this->consume();
+        }
+
+        $this->consume();
+
+        return [
+            'type' => self::COMPONENT,
+            'name' => $name
+        ];
     }
 
     private function current(int $length = 1): string

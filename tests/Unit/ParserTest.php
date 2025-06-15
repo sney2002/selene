@@ -271,3 +271,18 @@ test('parses blade comments', function () {
         ]
     ]);
 });
+
+
+test('parses a self closing component tag', function () {
+    $template = '<x-component />';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+        ]
+    ]);
+});
+
