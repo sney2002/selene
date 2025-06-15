@@ -157,9 +157,9 @@ class Parser
 
         $name = $this->getOpeningTagName();
 
-        $isSelfClosing = $this->current(2) === '/>';
-
         $this->consumeUntilIncluding('>');
+
+        $isSelfClosing = $this->previous(2) === '/>';
 
         $content = $isSelfClosing ? '' : $this->getComponentContent($name);
 
@@ -174,7 +174,7 @@ class Parser
     {
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '>' && $this->current() !== '/>' && $this->current() !== ' ') {
+        while ($this->current() && $this->current() !== '>' && $this->current() !== ' ') {
             $this->consume();
         }
 
@@ -213,6 +213,15 @@ class Parser
     private function current(int $length = 1): string
     {
         return substr($this->template, $this->index, $length);
+    }
+
+    private function previous(int $length = 1): string
+    {
+        if ($this->index - $length < 0) {
+            return '';
+        }
+
+        return substr($this->template, $this->index - $length, $length);
     }
 
     /**

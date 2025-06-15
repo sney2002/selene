@@ -287,6 +287,24 @@ test('parses a self closing component tag', function () {
     ]);
 });
 
+test('parses a self closing component tag mixed with content', function () {
+    $template = '<x-component />Hello, world!';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => []
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => 'Hello, world!'
+        ]
+    ]);
+});
+
 test('parses an empty component tag', function () {
     $template = '<x-component></x-component>';
     $parser = new Parser($template);
