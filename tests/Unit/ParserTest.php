@@ -35,3 +35,45 @@ test('parses a template with a single interpolation', function () {
         ]
     ]);
 });
+
+test('parses string interpolation with curly braces inside double quotes', function () {
+    $template = 'Hello, {{ "}" }}!';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => 'Hello, '
+        ],
+        [
+            'type' => Parser::INTERPOLATION,
+            'content' => '{{ "}" }}'
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => '!'
+        ]
+    ]);
+});
+
+test("parses string interpolation with curly braces inside single quotes", function () {
+    $template = "Hello, {{ '}' }}!";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => 'Hello, '
+        ],
+        [
+            'type' => Parser::INTERPOLATION,
+            'content' => "{{ '}' }}"
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => '!'
+        ]
+    ]);
+});

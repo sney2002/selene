@@ -36,6 +36,9 @@ class Parser
         $start = $this->index;
 
         while ($this->current() && $this->current() !== '}') {
+            if ($this->current() === '"' || $this->current() === "'") {
+                $this->consumeString();
+            }
             $this->consume();
         }
 
@@ -63,7 +66,17 @@ class Parser
             'type' => self::VERBATIM,
             'content' => $content
         ];
+    }
 
+    private function consumeString(): void
+    {
+        $quote = $this->current();
+
+        $this->consume();
+        while ($this->current() && $this->current() !== $quote) {
+            $this->consume();
+        }
+        $this->consume();
     }
 
     private function current(): string
