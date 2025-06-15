@@ -327,3 +327,22 @@ test('parses a component with content', function () {
         ]
     ]);
 });
+
+test('parses a component with html content', function () {
+    $template = '<x-component><div>Hello, world!</div></x-component>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => [
+                [
+                    'type' => Parser::VERBATIM,
+                    'content' => '<div>Hello, world!</div>'
+                ]
+            ]
+        ]
+    ]);
+});
