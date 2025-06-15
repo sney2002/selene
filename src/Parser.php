@@ -158,17 +158,11 @@ class Parser
     {
         $this->consume(3);
 
-        $start = $this->index;
-
-        while ($this->current() && $this->current() !== '>' && $this->current() !== '/>' && $this->current() !== ' ') {
-            $this->consume();
-        }
-
-        $name = substr($this->template, $start, $this->index - $start);
+        $name = $this->getOpeningTagName();
 
         $isSelfClosing = $this->current(2) === '/>';
 
-        while ($this->current() && $this->current() !== '>' && !$isSelfClosing) {
+        while ($this->current() && $this->current() !== '>') {
             $this->consume();
         }
 
@@ -183,12 +177,36 @@ class Parser
         ];
     }
 
+    private function getOpeningTagName(): string
+    {
+        $start = $this->index;
+
+        while ($this->current() && $this->current() !== '>' && $this->current() !== '/>' && $this->current() !== ' ') {
+            $this->consume();
+        }
+
+        return substr($this->template, $start, $this->index - $start);
+    }
+
     private function getComponentContent(string $name): string
     {
         $start = $this->index;
+        $level = 1;
+        
         $closingTagLength = 4 + strlen($name);
+        $openingTagLength = 3 + strlen($name);
 
-        while ($this->current() && $this->current($closingTagLength) !== '</x-' . $name) {
+        while ($this->current()) {
+            if ($this->current($openingTagLength) === '<x-' . $name) {
+                $level++;
+            } else if ($this->current($closingTagLength) === '</x-' . $name) {
+                $level--;
+            }
+
+            if ($level === 0) {
+                break;
+            }
+
             $this->consume();
         }
 

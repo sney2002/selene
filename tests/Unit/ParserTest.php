@@ -372,6 +372,32 @@ test('parses nested components', function () {
     ]);
 });
 
+test('parses nested components of the same name', function () {
+    $template = '<x-component><x-component>Hello, world!</x-component></x-component>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => [
+                [
+                    'type' => Parser::COMPONENT,
+                    'name' => 'component',
+                    'children' => [
+                        [
+                            'type' => Parser::VERBATIM,
+                            'content' => 'Hello, world!'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+});
+
+
 test('parses component with spaces before closing bracket', function () {
     $template = '<x-component></x-component    >';
     $parser = new Parser($template);
