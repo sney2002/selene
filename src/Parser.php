@@ -23,30 +23,24 @@ class Parser
         $this->tokens = [];
 
         while ($this->index < strlen($this->template)) {
-            if ($this->current() === '{' && $this->peek() === '{') {
-                $this->parseInterpolation();
-            } else if ($this->current() === '@') {
-                $this->parseDirective();
-            } else {
-                $this->parseVerbatim();
-            }
+            $this->tokens[] = match (true) {
+                $this->current(4) === '{{--' => $this->parseComment(),
+                $this->current(2) === '{{' => $this->parseInterpolation(),
+                $this->current() === '@' => $this->parseDirective(),
+                default => $this->parseVerbatim(),
+            };
         }
 
         return $this->tokens;
     }
 
-    private function parseInterpolation(): void
+    private function parseInterpolation(): array
     {
-        if ($this->peek(4) === '{{--') {
-            $this->parseComment();
-            return;
-        }
-
         $this->consume(2);
 
         $start = $this->index;
 
-        while ($this->current() && $this->current() !== '}') {
+        while ($this->current() && $this->current(2) !== '}}') {
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->consumeString();
             }
@@ -57,13 +51,13 @@ class Parser
 
         $this->consume(2);
 
-        $this->tokens[] = [
+        return [
             'type' => self::INTERPOLATION,
             'content' => $content
         ];
     }
 
-    private function parseDirective(): void
+    private function parseDirective(): array
     {
         $this->consume();
 
@@ -80,19 +74,19 @@ class Parser
             $parameters = $this->consumeParenthesesContent();
         }
 
-        $this->tokens[] = [
+        return [
             'type' => self::DIRECTIVE,
             'name' => trim($name),
             'parameters' => $parameters
         ];
     }
 
-    private function parseComment(): void {
+    private function parseComment(): array {
         $this->consume(4);
 
         $start = $this->index;
 
-        while ($this->current() && $this->peek(4) !== '--}}') {
+        while ($this->current() && $this->current(4) !== '--}}') {
             $this->consume();
         }
 
@@ -100,13 +94,13 @@ class Parser
 
         $this->consume(4);
 
-        $this->tokens[] = [
+        return [
             'type' => self::COMMENT,
             'content' => $comment
         ];
     }
 
-    private function parseVerbatim(): void
+    private function parseVerbatim(): array
     {
         $start = $this->index;
         
@@ -116,7 +110,7 @@ class Parser
 
         $content = substr($this->template, $start, $this->index - $start);
 
-        $this->tokens[] = [
+        return [
             'type' => self::VERBATIM,
             'content' => $content
         ];
@@ -160,18 +154,9 @@ class Parser
         return trim($content);
     }
 
-    private function current(): string
+    private function current(int $length = 1): string
     {
-        return $this->template[$this->index] ?? '';
-    }
-
-    private function peek(int $length = 1): string
-    {
-        if ($length > 1) {
-            return substr($this->template, $this->index, $this->index + $length);
-        }
-
-        return $this->template[$this->index] ?? '';
+        return substr($this->template, $this->index, $length);
     }
 
     private function consume(int $length = 1): void
