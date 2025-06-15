@@ -27,7 +27,7 @@ test('parses a template with a single interpolation', function () {
         ],
         [
             'type' => Parser::INTERPOLATION,
-            'content' => '{{ name }}'
+            'content' => ' name '
         ],
         [
             'type' => Parser::VERBATIM,
@@ -48,7 +48,7 @@ test('parses string interpolation with curly braces inside double quotes', funct
         ],
         [
             'type' => Parser::INTERPOLATION,
-            'content' => '{{ "}" }}'
+            'content' => ' "}" '
         ],
         [
             'type' => Parser::VERBATIM,
@@ -69,7 +69,7 @@ test("parses string interpolation with curly braces inside single quotes", funct
         ],
         [
             'type' => Parser::INTERPOLATION,
-            'content' => "{{ '}' }}"
+            'content' => " '}' "
         ],
         [
             'type' => Parser::VERBATIM,
@@ -90,7 +90,7 @@ test('parses string interpolation with escaped quotes (single quotes)', function
         ],
         [
             'type' => Parser::INTERPOLATION,
-            'content' => "{{ '\'}' }}"
+            'content' => " '\'}' "
         ],
         [
             'type' => Parser::VERBATIM,
@@ -111,7 +111,7 @@ test('parses string interpolation with escaped quotes (double quotes)', function
         ],
         [
             'type' => Parser::INTERPOLATION,
-            'content' => '{{ "\"}" }}'
+            'content' => ' "\"}" '
         ],
         [
             'type' => Parser::VERBATIM,

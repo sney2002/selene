@@ -33,6 +33,7 @@ class Parser
 
     private function parseInterpolation(): void
     {
+        $this->consume(2);
         $start = $this->index;
 
         while ($this->current() && $this->current() !== '}') {
@@ -42,9 +43,9 @@ class Parser
             $this->consume();
         }
 
-        $this->consume(2);
-
         $content = substr($this->template, $start, $this->index - $start);
+
+        $this->consume(2);
 
         $this->tokens[] = [
             'type' => self::INTERPOLATION,
@@ -77,7 +78,6 @@ class Parser
             if ($this->current() === '\\') {
                 $this->consume();
             }
-
             $this->consume();
         }
         $this->consume();
