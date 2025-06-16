@@ -153,7 +153,7 @@ class Parser
     {
         $this->consume('<x-');
 
-        $tagName = trim($this->getContentUntilAny(['>', ' ', '/>', "\n"]));
+        $tagName = trim($this->getContentUntilAny(['>', ' ', '/>', "\n", "\t", "\r"]));
 
         $attributes = $this->getComponentAttributes();
 
@@ -182,7 +182,7 @@ class Parser
                 break;
             }
 
-            $name = trim($this->getContentUntilAny(['=', '/>', '>', ' ']));
+            $name = trim($this->getContentUntilAny(['=', '/>', '>', ' ', "\n", "\t", "\r"]));
 
             $this->consumeSpaces();
 
