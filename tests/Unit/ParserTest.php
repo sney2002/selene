@@ -555,3 +555,20 @@ test('parses attributes with spaces around the equal sign', function () {
         ]
     ]);
 });
+
+test('parses boolean attributes', function () {
+    $template = '<x-component disabled ></x-component>';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'attributes' => [
+                'disabled' => ''
+            ],
+            'children' => []
+        ]
+    ]);
+});

@@ -216,7 +216,7 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntilAny(['=']);
+        $this->consumeUntilAny(['=', '/>', '>']);
 
         return trim(substr($this->template, $start, $this->index - $start));
     }
