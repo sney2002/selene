@@ -36,7 +36,7 @@ class Parser
 
     private function parseInterpolation(): array
     {
-        $this->consume(2);
+        $this->consume('{{');
 
         $start = $this->index;
 
@@ -49,7 +49,7 @@ class Parser
 
         $content = substr($this->template, $start, $this->index - $start);
 
-        $this->consume(2);
+        $this->consume('}}');
 
         return [
             'type' => self::INTERPOLATION,
@@ -59,7 +59,7 @@ class Parser
 
     private function parseDirective(): array
     {
-        $this->consume();
+        $this->consume('@');
 
         $parameters = '';
         $start = $this->index;
@@ -82,7 +82,7 @@ class Parser
     }
 
     private function parseComment(): array {
-        $this->consume(4);
+        $this->consume('{{--');
 
         $start = $this->index;
 
@@ -90,7 +90,7 @@ class Parser
 
         $comment = substr($this->template, $start, $this->index - $start);
 
-        $this->consume(4);
+        $this->consume('--}}');
 
         return [
             'type' => self::COMMENT,
@@ -102,7 +102,7 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntilAny(['{', '<x-', '@']);
+        $this->consumeUntilAny(['{{', '<x-', '@']);
 
         $content = substr($this->template, $start, $this->index - $start);
 
@@ -136,11 +136,12 @@ class Parser
 
     private function consumeParenthesesContent(): string
     {
-        $this->consume();
+        $this->consume('(');
+
         $start = $this->index;
         $level = 1;
 
-        while (!$this->eof() && $level > 0) {
+        while (!$this->eof()) {
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->getString();
             }
@@ -150,8 +151,15 @@ class Parser
             } else if ($this->current() === ')') {
                 $level--;
             }
+
+            if ($level === 0) {
+                break;
+            }
+
             $this->consume();
         }
+
+        $this->consume(')');
 
         $content = substr($this->template, $start, $this->index - $start - 1);
 
@@ -160,7 +168,7 @@ class Parser
 
     private function parseComponent(): array
     {
-        $this->consume(3);
+        $this->consume('<x-');
 
         $name = $this->getOpeningTagName();
 
@@ -227,7 +235,7 @@ class Parser
 
     private function getComponentAttributeValue(): string
     {
-        $this->consume();
+        $this->consume('=');
         $this->consumeSpaces();
 
         if ($this->current() === '"' || $this->current() === "'") {
@@ -356,17 +364,25 @@ class Parser
     private function consumeUntilIncluding(string $token): void
     {
         $this->consumeUntil($token);
-        $this->consume(strlen($token));
+        $this->consume($token);
     }
 
     /**
      * Consumes the template by the given length
      * 
-     * @param int $length The length to consume
+     * @param string $token The token to consume (optional)
      * @return void
      */
-    private function consume(int $length = 1): void
+    private function consume(string $token = ''): void
     {
-        $this->index += $length;
+        if (! $token) {
+            $this->index += 1;
+            return;
+        }
+        
+        $actualToken = substr($this->template, $this->index, strlen($token));
+        assert($actualToken === $token, "Expected token {$token} not found at index {$this->index}, got {$actualToken}");
+        
+        $this->index += strlen($token);
     }
 }
