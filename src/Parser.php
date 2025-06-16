@@ -231,7 +231,15 @@ class Parser
     {
         $this->consume();
 
-        return $this->getString();
+        if ($this->current() === '"' || $this->current() === "'") {
+            return $this->getString();
+        }
+
+        $start = $this->index;
+
+        $this->consumeUntilAny([' ', '>', '/>']);
+
+        return substr($this->template, $start, $this->index - $start);
     }
 
     private function getComponentContent(string $name): string
