@@ -539,3 +539,19 @@ test('parses component with unquoted attribute value', function () {
     ]);
 });
 
+test('parses attributes with spaces around the equal sign', function () {
+    $template = "<x-component name\r\n\t =\r\n\t 'John' />";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'attributes' => [
+                'name' => 'John'
+            ],
+            'children' => []
+        ]
+    ]);
+});

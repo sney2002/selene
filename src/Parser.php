@@ -164,8 +164,6 @@ class Parser
 
         $name = $this->getOpeningTagName();
 
-        $this->consumeSpaces();
-
         $attributes = $this->getComponentAttributes();
 
         $this->consumeUntilIncluding('>');
@@ -196,13 +194,9 @@ class Parser
         $attributes = [];
 
         while ($this->current()) {
+            $this->consumeSpaces();
             if ($this->current() === '>' || $this->current(2) === '/>') {
                 break;
-            }
-
-            if ($this->current() === ' ') {
-                $this->consume();
-                continue;
             }
 
             $name = $this->getComponentAttributeName();
@@ -222,14 +216,15 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntilAny(['=', ' ']);
+        $this->consumeUntilAny(['=']);
 
-        return substr($this->template, $start, $this->index - $start);
+        return trim(substr($this->template, $start, $this->index - $start));
     }
 
     private function getComponentAttributeValue(): string
     {
         $this->consume();
+        $this->consumeSpaces();
 
         if ($this->current() === '"' || $this->current() === "'") {
             return $this->getString();
