@@ -2,20 +2,21 @@
 
 namespace Selene;
 
+use Selene\Node\Node;
+use Selene\Node\VerbatimNode;
+use Selene\Node\InterpolationNode;
+use Selene\Node\DirectiveNode;
+use Selene\Node\CommentNode;
+use Selene\Node\ComponentNode;
+
 class Parser
 {
     const WHITESPACE = 'ctype_space';
     const PRINTABLE = 'ctype_graph';
 
-    const VERBATIM = 'verbatim';
-    const INTERPOLATION = 'interpolation';
-    const DIRECTIVE = 'directive';
-    const COMMENT = 'comment';
-    const COMPONENT = 'component';
-
     private int $index = 0;
     private string $template;
-    private array $tokens = [];
+    private array $nodes = [];
 
     public function __construct(string $template)
     {
@@ -25,7 +26,7 @@ class Parser
     public function parse(): array
     {
         while (!$this->eof()) {
-            $this->tokens[] = match (true) {
+            $this->nodes[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
                 $this->current(3) === '<x-' => $this->parseComponent(),
                 $this->current(2) === '{{' => $this->parseInterpolation(),
@@ -34,10 +35,10 @@ class Parser
             };
         }
 
-        return $this->tokens;
+        return $this->nodes;
     }
 
-    private function parseInterpolation(): array
+    private function parseInterpolation(): Node
     {
         $this->consume('{{');
 
@@ -55,13 +56,10 @@ class Parser
 
         $this->consume('}}');
 
-        return [
-            'type' => self::INTERPOLATION,
-            'content' => $content
-        ];
+        return new InterpolationNode($content);
     }
 
-    private function parseDirective(): array
+    private function parseDirective(): Node
     {
         $this->consume('@');
 
@@ -77,34 +75,24 @@ class Parser
 
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
-        return [
-            'type' => self::DIRECTIVE,
-            'name' => trim($name),
-            'parameters' => $parameters
-        ];
+        return new DirectiveNode(trim($name), $parameters);
     }
 
-    private function parseComment(): array {
+    private function parseComment(): Node {
         $this->consume('{{--');
 
         $comment = $this->getContentUntil('--}}'); 
 
         $this->consume('--}}');
 
-        return [
-            'type' => self::COMMENT,
-            'content' => $comment
-        ];
+        return new CommentNode($comment);
     }
 
-    private function parseVerbatim(): array
+    private function parseVerbatim(): Node
     {
         $content = $this->getContentUntilAny(['{{', '<x-', '@']);
 
-        return [
-            'type' => self::VERBATIM,
-            'content' => $content
-        ];
+        return new VerbatimNode($content);
     }
 
     private function getString(): string
@@ -161,7 +149,7 @@ class Parser
         return trim($content);
     }
 
-    private function parseComponent(): array
+    private function parseComponent(): Node
     {
         $this->consume('<x-');
 
@@ -175,12 +163,7 @@ class Parser
 
         $content = $isSelfClosing ? '' : $this->getComponentContent($tagName);
 
-        return [
-            'type' => self::COMPONENT,
-            'name' => $tagName,
-            'attributes' => $attributes,
-            'children' => (new self($content))->parse()
-        ];
+        return new ComponentNode($tagName, $attributes, (new self($content))->parse());
     }
 
     private function getComponentAttributes(): array
