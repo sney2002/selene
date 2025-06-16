@@ -21,7 +21,7 @@ class Parser
 
     public function parse(): array
     {
-        while (!$this->isEof()) {
+        while (!$this->eof()) {
             $this->tokens[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
                 $this->current(3) === '<x-' => $this->parseComponent(),
@@ -40,7 +40,7 @@ class Parser
 
         $start = $this->index;
 
-        while (!$this->isEof() && $this->current(2) !== '}}') {
+        while (!$this->eof() && $this->current(2) !== '}}') {
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->getString();
             }
@@ -64,7 +64,7 @@ class Parser
         $parameters = '';
         $start = $this->index;
 
-        while (!$this->isEof() && $this->current() !== "\n" && $this->current() !== '(') {
+        while (!$this->eof() && $this->current() !== "\n" && $this->current() !== '(') {
             $this->consume();
         }
 
@@ -120,7 +120,7 @@ class Parser
         
         $start = $this->index;
 
-        while (!$this->isEof() && $this->current() !== $quote) {
+        while (!$this->eof() && $this->current() !== $quote) {
             if ($this->current() === '\\') {
                 $this->consume();
             }
@@ -140,7 +140,7 @@ class Parser
         $start = $this->index;
         $level = 1;
 
-        while (!$this->isEof() && $level > 0) {
+        while (!$this->eof() && $level > 0) {
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->getString();
             }
@@ -193,7 +193,7 @@ class Parser
     {
         $attributes = [];
 
-        while (!$this->isEof()) {
+        while (!$this->eof()) {
             $this->consumeSpaces();
             if ($this->current() === '>' || $this->current(2) === '/>') {
                 break;
@@ -249,7 +249,7 @@ class Parser
         $closingTagLength = 4 + strlen($name);
         $openingTagLength = 3 + strlen($name);
 
-        while (!$this->isEof()) {
+        while (!$this->eof()) {
             if ($this->current($openingTagLength) === '<x-' . $name) {
                 $level++;
             } else if ($this->current($closingTagLength) === '</x-' . $name) {
@@ -275,7 +275,7 @@ class Parser
      * 
      * @return bool
      */
-    private function isEof(): bool
+    private function eof(): bool
     {
         return $this->index >= strlen($this->template);
     }
@@ -323,7 +323,7 @@ class Parser
     {
         $tokenLength = strlen($token);
 
-        while (!$this->isEof() && $this->current($tokenLength) !== $token) {
+        while (!$this->eof() && $this->current($tokenLength) !== $token) {
             $this->consume();
         }
     }
@@ -336,7 +336,7 @@ class Parser
      */
     private function consumeUntilAny(array $tokens): void
     {
-        while (!$this->isEof()) {
+        while (!$this->eof()) {
             foreach ($tokens as $token) {
                 if ($this->current(strlen($token)) === $token) {
                     return;
