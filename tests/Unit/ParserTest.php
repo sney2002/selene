@@ -15,6 +15,19 @@ test('parses a verbatim string', function () {
     ]);
 });
 
+test('parse string with zeros', function () {
+    $template = "007";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+    
+    expect($result)->toBe([
+        [
+            'type' => Parser::VERBATIM,
+            'content' => '007'
+        ]
+    ]);
+});
+
 test('parses a template with a single interpolation', function () {
     $template = 'Hello, {{ name }}!';
     $parser = new Parser($template);
@@ -572,3 +585,4 @@ test('parses boolean attributes', function () {
         ]
     ]);
 });
+
