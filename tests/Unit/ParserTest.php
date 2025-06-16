@@ -604,3 +604,21 @@ test('parses multiple attributes', function () {
         ]
     ]);
 });
+
+test('whitespaces between attributes', function () {
+    $template = "<x-component\r\n\t\r\n\t name='John'\r\n\t\r\n\tclass='bg-red-500'\r\n\t\r\n/>";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'attributes' => [
+                'name' => 'John',
+                'class' => 'bg-red-500'
+            ],
+            'children' => []
+        ]
+    ]);
+});

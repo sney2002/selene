@@ -186,7 +186,7 @@ class Parser
 
         $this->consumeUntilAny(['>', ' ', '/>', "\n"]);
 
-        return substr($this->template, $start, $this->index - $start);
+        return trim(substr($this->template, $start, $this->index - $start));
     }
 
     private function getComponentAttributes(): array
