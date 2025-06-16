@@ -7,7 +7,7 @@ test('parses a verbatim string', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, world!'
@@ -20,7 +20,7 @@ test('parses a template with a single interpolation', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, '
@@ -41,7 +41,7 @@ test('parses string interpolation with curly braces inside double quotes', funct
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, '
@@ -62,7 +62,7 @@ test("parses string interpolation with curly braces inside single quotes", funct
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, '
@@ -83,7 +83,7 @@ test('parses string interpolation with escaped quotes (single quotes)', function
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, '
@@ -104,7 +104,7 @@ test('parses string interpolation with escaped quotes (double quotes)', function
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => 'Hello, '
@@ -126,7 +126,7 @@ test('parses a directive', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -140,7 +140,7 @@ test('parses a directive after line break', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
     
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => "\n"
@@ -158,7 +158,7 @@ test('parses a directive with a space', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -172,7 +172,7 @@ test('parses a directive with a space and a newline', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
     
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -190,7 +190,7 @@ test('parses directives with parameters', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -204,7 +204,7 @@ test('parses directives with parameters and a newline', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -222,7 +222,7 @@ test('parses directives line breaks inside parentheses', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -240,7 +240,7 @@ test('parses directives with nested parentheses', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -254,7 +254,7 @@ test('parses directives with parentheses inside single quotes', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -268,7 +268,7 @@ test('parses directives with parentheses inside double quotes', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::DIRECTIVE,
             'name' => 'if',
@@ -282,7 +282,7 @@ test('parses blade comments', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMMENT,
             'content' => ' blade comment '
@@ -295,12 +295,12 @@ test('parses a self closing component tag', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -310,12 +310,12 @@ test('parses a self closing component without spaces', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
     
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -325,7 +325,7 @@ test('parses component after line break', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::VERBATIM,
             'content' => "\n"
@@ -333,8 +333,8 @@ test('parses component after line break', function () {
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -344,12 +344,12 @@ test('parses component with whitespaces inside the tag', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
     
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -359,12 +359,12 @@ test('parses a self closing component tag mixed with content', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ],
         [
             'type' => Parser::VERBATIM,
@@ -378,12 +378,12 @@ test('parses an empty component tag', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -393,7 +393,7 @@ test('parses a component with content', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -421,7 +421,7 @@ test('parses a component with html content', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -441,11 +441,11 @@ test('parses nested components', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
-            'attributes' => [],
             'name' => 'component',
+            'attributes' => [],
             'children' => [
                 [
                     'type' => Parser::COMPONENT,
@@ -468,7 +468,7 @@ test('parses nested components of the same name', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -495,12 +495,12 @@ test('parses component with spaces before closing bracket', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
-            'children' => [],
-            'attributes' => []
+            'attributes' => [],
+            'children' => []
         ]
     ]);
 });
@@ -510,7 +510,7 @@ test('parses component with attribute', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -527,7 +527,7 @@ test('parses component with unquoted attribute value', function () {
     $parser = new Parser($template);
     $result = $parser->parse();
 
-    expect($result)->toEqualCanonicalizing([
+    expect($result)->toBe([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -538,3 +538,4 @@ test('parses component with unquoted attribute value', function () {
         ]
     ]);
 });
+
