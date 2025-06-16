@@ -4,6 +4,8 @@ namespace Selene;
 
 class Parser
 {
+    const WHITESPACE = 'ctype_space';
+
     const VERBATIM = 'verbatim';
     const INTERPOLATION = 'interpolation';
     const DIRECTIVE = 'directive';
@@ -172,7 +174,7 @@ class Parser
     {
         $this->consume('<x-');
 
-        $tagName = trim($this->getContentUntilAny(['>', ' ', '/>', "\n", "\t", "\r"]));
+        $tagName = trim($this->getContentUntilAny(['>', '/>', self::WHITESPACE]));
 
         $attributes = $this->getComponentAttributes();
 
@@ -201,7 +203,7 @@ class Parser
                 break;
             }
 
-            $name = trim($this->getContentUntilAny(['=', '/>', '>', ' ', "\n", "\t", "\r"]));
+            $name = trim($this->getContentUntilAny(['=', '/>', '>', self::WHITESPACE]));
 
             $this->consumeSpaces();
 
@@ -294,9 +296,7 @@ class Parser
 
     private function consumeSpaces(): void
     {
-        $whitespaceChars = [' ', "\n", "\t", "\r"];
-
-        while (!$this->eof() && in_array($this->current(), $whitespaceChars)) {
+        while (!$this->eof() && ctype_space($this->current())) {
             $this->consume();
         }
     }
