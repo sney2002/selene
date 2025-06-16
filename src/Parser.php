@@ -343,16 +343,20 @@ class Parser
     }
 
     /**
-     * Consumes the template until any of the given tokens is found
+     * Consumes the template until any of the given conditions is met
      * 
-     * @param array $tokens The tokens to consume until
+     * @param array<string|callable> $conditions The conditions to consume until
      * @return void
      */
-    private function consumeUntilAny(array $tokens): void
+    private function consumeUntilAny(array $conditions): void
     {
         while (!$this->eof()) {
-            foreach ($tokens as $token) {
-                if ($this->current(strlen($token)) === $token) {
+            foreach ($conditions as $condition) {
+                if (is_callable($condition) && $condition($this->current())) {
+                    return;
+                }
+
+                if (is_string($condition) && $this->current(strlen($condition)) === $condition) {
                     return;
                 }
             }
