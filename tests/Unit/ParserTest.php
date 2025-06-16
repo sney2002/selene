@@ -180,6 +180,42 @@ test('parses a directive with a space', function () {
     ]);
 });
 
+test('line breaks after a directive should be preserved', function () {
+    $template = "@if\ncontent";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => ''
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => "\ncontent"
+        ]
+    ]);
+});
+
+test('non whitespace characters after a directive should be preserved', function () {
+    $template = "@if content";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::DIRECTIVE,
+            'name' => 'if',
+            'parameters' => ''
+        ],
+        [
+            'type' => Parser::VERBATIM,
+            'content' => "content"
+        ]
+    ]);
+});
+
 test('parses a directive with a space and a newline', function () {
     $template = "@if \n";
     $parser = new Parser($template);

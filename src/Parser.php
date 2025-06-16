@@ -62,7 +62,26 @@ class Parser
     {
         $this->consume('@');
 
-        $name = $this->getContentUntilAny(["\n", "("]);
+        $start = $this->index;
+
+        while (!$this->eof() && ctype_alpha($this->current())) {
+            $this->consume();
+        }
+
+        $name = substr($this->template, $start, $this->index - $start);
+
+        while (!$this->eof()) {
+            if (! ctype_space($this->current())) {
+                break;
+            }
+
+            if ($this->current() === "\n") {
+                break;
+            }
+
+            $this->consume();
+        }
+
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
         return [
