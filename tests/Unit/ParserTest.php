@@ -586,3 +586,21 @@ test('parses boolean attributes', function () {
     ]);
 });
 
+test('parses multiple attributes', function () {
+    $template = '<x-component name="John" disabled class="bg-red-500" />';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toBe([
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'attributes' => [
+                'name' => 'John',
+                'disabled' => '',
+                'class' => 'bg-red-500'
+            ],
+            'children' => []
+        ]
+    ]);
+});

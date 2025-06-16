@@ -216,9 +216,13 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntilAny(['=', '/>', '>']);
+        $this->consumeUntilAny(['=', '/>', '>', ' ']);
 
-        return trim(substr($this->template, $start, $this->index - $start));
+        $name = trim(substr($this->template, $start, $this->index - $start));
+
+        $this->consumeSpaces();
+
+        return $name;
     }
 
     private function getComponentAttributeValue(): string
