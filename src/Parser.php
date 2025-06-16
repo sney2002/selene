@@ -44,6 +44,7 @@ class Parser
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->getString();
             }
+
             $this->consume();
         }
 
@@ -61,18 +62,8 @@ class Parser
     {
         $this->consume('@');
 
-        $parameters = '';
-        $start = $this->index;
-
-        while (!$this->eof() && $this->current() !== "\n" && $this->current() !== '(') {
-            $this->consume();
-        }
-
-        $name = substr($this->template, $start, $this->index - $start);
-
-        if ($this->current() === '(') {
-            $parameters = $this->consumeParenthesesContent();
-        }
+        $name = $this->getContentUntilAny(["\n", "("]);
+        $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
         return [
             'type' => self::DIRECTIVE,
@@ -84,11 +75,7 @@ class Parser
     private function parseComment(): array {
         $this->consume('{{--');
 
-        $start = $this->index;
-
-        $this->consumeUntil('--}}');
-
-        $comment = substr($this->template, $start, $this->index - $start);
+        $comment = $this->getContentUntil('--}}'); 
 
         $this->consume('--}}');
 
@@ -100,11 +87,7 @@ class Parser
 
     private function parseVerbatim(): array
     {
-        $start = $this->index;
-
-        $this->consumeUntilAny(['{{', '<x-', '@']);
-
-        $content = substr($this->template, $start, $this->index - $start);
+        $content = $this->getContentUntilAny(['{{', '<x-', '@']);
 
         return [
             'type' => self::VERBATIM,
@@ -116,8 +99,8 @@ class Parser
     {
         $quote = $this->current();
 
-        $this->consume();
-        
+        $this->consume($quote);
+
         $start = $this->index;
 
         while (!$this->eof() && $this->current() !== $quote) {
@@ -129,7 +112,7 @@ class Parser
 
         $string = substr($this->template, $start, $this->index - $start);
 
-        $this->consume();
+        $this->consume($quote);
 
         return $string;
     }
@@ -159,9 +142,9 @@ class Parser
             $this->consume();
         }
 
-        $this->consume(')');
+        $content = substr($this->template, $start, $this->index - $start);
 
-        $content = substr($this->template, $start, $this->index - $start - 1);
+        $this->consume(')');
 
         return trim($content);
     }
@@ -170,7 +153,7 @@ class Parser
     {
         $this->consume('<x-');
 
-        $name = $this->getOpeningTagName();
+        $tagName = trim($this->getContentUntilAny(['>', ' ', '/>', "\n"]));
 
         $attributes = $this->getComponentAttributes();
 
@@ -178,23 +161,14 @@ class Parser
 
         $isSelfClosing = $this->previous(2) === '/>';
 
-        $content = $isSelfClosing ? '' : $this->getComponentContent($name);
+        $content = $isSelfClosing ? '' : $this->getComponentContent($tagName);
 
         return [
             'type' => self::COMPONENT,
-            'name' => $name,
+            'name' => $tagName,
             'attributes' => $attributes,
             'children' => (new self($content))->parse()
         ];
-    }
-
-    private function getOpeningTagName(): string
-    {
-        $start = $this->index;
-
-        $this->consumeUntilAny(['>', ' ', '/>', "\n"]);
-
-        return trim(substr($this->template, $start, $this->index - $start));
     }
 
     private function getComponentAttributes(): array
@@ -203,16 +177,16 @@ class Parser
 
         while (!$this->eof()) {
             $this->consumeSpaces();
+
             if ($this->current() === '>' || $this->current(2) === '/>') {
                 break;
             }
 
-            $name = $this->getComponentAttributeName();
-            $value = '';
+            $name = trim($this->getContentUntilAny(['=', '/>', '>', ' ']));
 
-            if ($this->current() === '=') {
-                $value = $this->getComponentAttributeValue();
-            }
+            $this->consumeSpaces();
+
+            $value = $this->current() === '=' ? $this->getComponentAttributeValue() : '';
 
             $attributes[$name] = $value;
         }
@@ -220,33 +194,18 @@ class Parser
         return $attributes;
     }
 
-    private function getComponentAttributeName(): string
-    {
-        $start = $this->index;
-
-        $this->consumeUntilAny(['=', '/>', '>', ' ']);
-
-        $name = trim(substr($this->template, $start, $this->index - $start));
-
-        $this->consumeSpaces();
-
-        return $name;
-    }
 
     private function getComponentAttributeValue(): string
     {
         $this->consume('=');
+
         $this->consumeSpaces();
 
         if ($this->current() === '"' || $this->current() === "'") {
             return $this->getString();
         }
 
-        $start = $this->index;
-
-        $this->consumeUntilAny([' ', '>', '/>']);
-
-        return substr($this->template, $start, $this->index - $start);
+        return $this->getContentUntilAny([' ', '>', '/>']);
     }
 
     private function getComponentContent(string $name): string
@@ -316,9 +275,37 @@ class Parser
 
     private function consumeSpaces(): void
     {
-        while ($this->current() === ' ' || $this->current() === "\n" || $this->current() === "\t" || $this->current() === "\r") {
+        $whitespaceChars = [' ', "\n", "\t", "\r"];
+
+        while (!$this->eof() && in_array($this->current(), $whitespaceChars)) {
             $this->consume();
         }
+    }
+
+    /**
+     * Returns the content until any of the given tokens is found
+     * 
+     * @param array $tokens The tokens to consume until
+     * @return string
+     */
+    private function getContentUntilAny(array $tokens): string
+    {
+        $start = $this->index;
+        $this->consumeUntilAny($tokens);
+        return substr($this->template, $start, $this->index - $start);
+    }
+
+    /**
+     * Returns the content until the given token is found
+     * 
+     * @param string $token The token to consume until
+     * @return string
+     */
+    private function getContentUntil(string $token): string
+    {
+        $start = $this->index;
+        $this->consumeUntil($token);
+        return substr($this->template, $start, $this->index - $start);
     }
 
     /**
