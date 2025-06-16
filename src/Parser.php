@@ -5,6 +5,7 @@ namespace Selene;
 class Parser
 {
     const WHITESPACE = 'ctype_space';
+    const PRINTABLE = 'ctype_graph';
 
     const VERBATIM = 'verbatim';
     const INTERPOLATION = 'interpolation';
@@ -72,17 +73,7 @@ class Parser
 
         $name = substr($this->template, $start, $this->index - $start);
 
-        while (!$this->eof()) {
-            if (! ctype_space($this->current())) {
-                break;
-            }
-
-            if ($this->current() === "\n") {
-                break;
-            }
-
-            $this->consume();
-        }
+        $this->consumeUntilAny(["\n", self::PRINTABLE]);
 
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
