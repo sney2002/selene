@@ -306,7 +306,7 @@ test('parses a self closing component tag', function () {
 });
 
 test('parses a self closing component without spaces', function () {
-    $template = '<x-component/>';
+    $template = "<x-component/>";
     $parser = new Parser($template);
     $result = $parser->parse();
     
@@ -330,6 +330,21 @@ test('parses component after line break', function () {
             'type' => Parser::VERBATIM,
             'content' => "\n"
         ],
+        [
+            'type' => Parser::COMPONENT,
+            'name' => 'component',
+            'children' => [],
+            'attributes' => []
+        ]
+    ]);
+});
+
+test('parses component with whitespaces inside the tag', function () {
+    $template = "<x-component\n \t \r\n/>";
+    $parser = new Parser($template);
+    $result = $parser->parse();
+    
+    expect($result)->toEqualCanonicalizing([
         [
             'type' => Parser::COMPONENT,
             'name' => 'component',
@@ -476,7 +491,7 @@ test('parses nested components of the same name', function () {
 });
 
 test('parses component with spaces before closing bracket', function () {
-    $template = '<x-component></x-component    >';
+    $template = '<x-component></x-component>';
     $parser = new Parser($template);
     $result = $parser->parse();
 

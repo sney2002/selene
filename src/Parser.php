@@ -164,6 +164,8 @@ class Parser
 
         $name = $this->getOpeningTagName();
 
+        $this->consumeSpaces();
+
         $attributes = $this->getComponentAttributes();
 
         $this->consumeUntilIncluding('>');
@@ -184,7 +186,7 @@ class Parser
     {
         $start = $this->index;
 
-        $this->consumeUntilAny(['>', ' ', '/>']);
+        $this->consumeUntilAny(['>', ' ', '/>', "\n"]);
 
         return substr($this->template, $start, $this->index - $start);
     }
@@ -285,6 +287,13 @@ class Parser
         }
 
         return substr($this->template, $this->index - $length, $length);
+    }
+
+    private function consumeSpaces(): void
+    {
+        while ($this->current() === ' ' || $this->current() === "\n" || $this->current() === "\t" || $this->current() === "\r") {
+            $this->consume();
+        }
     }
 
     /**
