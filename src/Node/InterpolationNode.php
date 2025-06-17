@@ -2,6 +2,8 @@
 
 namespace Selene\Node;
 
+use Selene\Visitor\NodeVisitor;
+
 class InterpolationNode implements Node {
     private string $content;
 
@@ -15,5 +17,9 @@ class InterpolationNode implements Node {
 
     public function getContent(): string {
         return $this->content;
+    }
+
+    public function accept(NodeVisitor $visitor): mixed {
+        return $visitor->visitInterpolationNode($this);
     }
 } 

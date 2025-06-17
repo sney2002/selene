@@ -2,6 +2,8 @@
 
 namespace Selene\Node;
 
+use Selene\Visitor\NodeVisitor;
+
 class ComponentNode implements Node {
     private string $name;
     private array $attributes;
@@ -27,5 +29,9 @@ class ComponentNode implements Node {
 
     public function getChildren(): array {
         return $this->children;
+    }
+
+    public function accept(NodeVisitor $visitor): mixed {
+        return $visitor->visitComponentNode($this);
     }
 } 

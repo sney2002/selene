@@ -2,6 +2,8 @@
 
 namespace Selene\Node;
 
+use Selene\Visitor\NodeVisitor;
+
 class DirectiveNode implements Node {
     private string $name;
     private string $parameters;
@@ -21,5 +23,9 @@ class DirectiveNode implements Node {
 
     public function getParameters(): string {
         return $this->parameters;
+    }
+
+    public function accept(NodeVisitor $visitor): mixed {
+        return $visitor->visitDirectiveNode($this);
     }
 } 
