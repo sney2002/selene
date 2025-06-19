@@ -10,6 +10,9 @@ use Selene\Node\VerbatimNode;
 use Selene\Parser;
 
 class PhpTransformVisitor implements NodeVisitor {
+
+    public function __construct(private array $directives) {}
+
     public function visitCommentNode(CommentNode $node): mixed {
         return '<?php /* ' . $node->getContent() . ' */ ?>';
     }
@@ -39,11 +42,17 @@ class PhpTransformVisitor implements NodeVisitor {
     }
 
     public function visitDirectiveNode(DirectiveNode $node): mixed {
-        if (str_starts_with($node->getName(), 'end')) {
-            return '<?php ' . $node->getName() . '; ?>';
+        foreach ($this->directives as $directive) {
+            if ($output = $directive->render($node)) {
+                return $output;
+            }
         }
 
-        return '<?php ' . $node->getName() . '(' . $node->getParameters() . '): ?>';
+        if ($node->getParameters()) {
+            return '@' . $node->getName() . '(' . $node->getParameters() . ')';
+        }
+
+        return '@' . $node->getName();
     }
 
     public function visitInterpolationNode(InterpolationNode $node): mixed {
