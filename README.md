@@ -22,6 +22,7 @@ While Laravel's Blade template engine is powerful and elegant, sometimes you nee
 
 ### In Progress 🚧
 - Anonymous components (slots, attributes, properties)
+- Layout directives (@extends, @section, @yield...)
 - Custom directive support
 - Template validation
 - Documentation
