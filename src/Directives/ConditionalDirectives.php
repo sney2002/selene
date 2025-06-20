@@ -18,6 +18,11 @@ class ConditionalDirectives implements DirectiveInterface {
             case 'isset':
                 return '<?php if (isset(' . $directive->getParameters() . ')): ?>';
             case 'empty':
+                // This must be the @empty of a @forelse loop
+                if (! $directive->getParameters()) {
+                    return null;
+                }
+
                 return '<?php if (empty(' . $directive->getParameters() . ')): ?>';
             case 'endunless':
             case 'endempty':

@@ -10,11 +10,35 @@ use Selene\Node\VerbatimNode;
 use Selene\Parser;
 
 class PhpTransformVisitor implements NodeVisitor {
+    private array $registeredDirectives = [
+        \Selene\Directives\ConditionalDirectives::class,
+        \Selene\Directives\ForelseLoopDirective::class,
+        \Selene\Directives\ForeachLoopDirective::class,
+        \Selene\Directives\ForLoopDirective::class,
+        \Selene\Directives\SwitchDirective::class,
+        \Selene\Directives\WhileLoopDirective::class,
+    ];
 
-    public function __construct(private array $directives) {}
+    private array $directives = [];
+
+    public function __construct() {
+        foreach ($this->registeredDirectives as $directive) {
+            $this->directives[] = new $directive();
+        }
+    }
+
+    public function render(array $nodes) : string {
+        $output = '';
+
+        foreach ($nodes as $node) {
+            $output .= $node->accept($this);
+        }
+
+        return $output;
+    }
 
     public function visitCommentNode(CommentNode $node): mixed {
-        return '<?php /* ' . $node->getContent() . ' */ ?>';
+        return '<?php /*' . $node->getContent() . '*/ ?>';
     }
 
     public function visitComponentNode(ComponentNode $node): mixed {
