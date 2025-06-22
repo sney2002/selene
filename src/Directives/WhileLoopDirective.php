@@ -4,7 +4,10 @@ namespace Selene\Directives;
 
 use Selene\Node\DirectiveNode;
 
-class WhileLoopDirective implements DirectiveInterface {
+class WhileLoopDirective extends Directive {
+    protected array $openingDirectives = ['while'];
+    protected array $closingDirectives = ['endwhile'];
+
     public function render(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'while':

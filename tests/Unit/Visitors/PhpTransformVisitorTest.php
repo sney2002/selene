@@ -150,3 +150,30 @@ test('Compiles a switch directive', function () {
             <p>Default</p>
         <?php endswitch; ?>');
 });
+
+test('Throws an error if a directive is not closed', function () {
+    $template = '@if(true)
+        <p>True</p>
+    @elseif(false)
+        <p>False</p>
+    @else
+        <p>Unknown</p>';
+
+    expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Directive @if is not closed on line 1'));
+});
+
+test('Throws an error if a directive is closed in the wrong order', function () {
+    $template = '@if(true)
+    @foreach($array as $item)
+        <p>True</p>
+    @endif';
+
+    expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Expected @endforeach, got @endif on line 4'));
+});
+
+test('Throws an error if the first directive found is not valid', function () {
+    $template = 'content
+    @endif';
+
+    expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Expected @if, got @endif on line 2'));
+});

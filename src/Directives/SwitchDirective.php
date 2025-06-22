@@ -4,7 +4,11 @@ namespace Selene\Directives;
 
 use Selene\Node\DirectiveNode;
 
-class SwitchDirective implements DirectiveInterface {
+class SwitchDirective extends Directive {
+    protected array $openingDirectives = ['switch'];
+    protected array $closingDirectives = ['endswitch'];
+    protected array $canRender = ['case', 'break', 'default'];
+
     private array $switchStack = [];
 
     public function render(DirectiveNode $directive) : ?string {

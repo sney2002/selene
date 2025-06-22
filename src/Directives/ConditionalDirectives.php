@@ -4,7 +4,11 @@ namespace Selene\Directives;
 
 use Selene\Node\DirectiveNode;
 
-class ConditionalDirectives implements DirectiveInterface {
+class ConditionalDirectives extends Directive {
+    protected array $openingDirectives = ['if', 'unless', 'isset', 'empty'];
+    protected array $closingDirectives = ['endif', 'endunless', 'endisset', 'endempty'];
+    protected array $canRender = ['elseif', 'else'];
+
     public function render(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'if':

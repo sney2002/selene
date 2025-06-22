@@ -7,9 +7,14 @@ use Selene\Node\ComponentNode;
 use Selene\Node\DirectiveNode;
 use Selene\Node\InterpolationNode;
 use Selene\Node\VerbatimNode;
+use Selene\Directives\Directive;
 use Selene\Parser;
 
 class PhpTransformVisitor implements NodeVisitor {
+    private array $directivesStack = [];
+    private array $directiveOpeningStack = [];
+    private int $line = 1;
+
     private array $registeredDirectives = [
         \Selene\Directives\ConditionalDirectives::class,
         \Selene\Directives\ForelseLoopDirective::class,
@@ -32,6 +37,12 @@ class PhpTransformVisitor implements NodeVisitor {
 
         foreach ($nodes as $node) {
             $output .= $node->accept($this);
+            $this->line = substr_count($output, "\n") + 1;
+        }
+
+        if (count($this->directiveOpeningStack) > 0) {
+            [$directive, $line] = end($this->directiveOpeningStack);
+            throw new \ParseError('Directive @' . $directive . ' is not closed on line ' . $line);
         }
 
         return $output;
@@ -66,10 +77,50 @@ class PhpTransformVisitor implements NodeVisitor {
     }
 
     public function visitDirectiveNode(DirectiveNode $node): mixed {
-        foreach ($this->directives as $directive) {
-            if ($output = $directive->render($node)) {
-                return $output;
-            }
+        $directive = $this->getDirective($node);
+
+        if (! $directive) {
+            return $this->handleUnexpectedDirective($node);
+        }
+
+        if ($directive->hasClosingDirective($node->getName())) {
+            array_pop($this->directivesStack);
+            array_pop($this->directiveOpeningStack);
+        }
+
+        return $directive->render($node);
+    }
+
+    public function visitInterpolationNode(InterpolationNode $node): mixed {
+        return '<?php echo e(' . trim($node->getContent()) . '); ?>';
+    }
+
+    public function visitVerbatimNode(VerbatimNode $node): mixed {
+        return $node->getContent();
+    }
+
+    private function getDirective(DirectiveNode $node) {
+        $directive = end($this->directivesStack);
+
+        if ($directive && $directive->canRender($node)) {
+            return $directive;
+        }
+
+        $directives = array_filter($this->directives, function($directive) use ($node) {
+            return $directive->hasOpeningDirective($node->getName());
+        });
+
+        if ($directive = end($directives)) {
+            $this->directivesStack[] = $directive;
+            $this->directiveOpeningStack[] = [$node->getName(), $this->line];
+        }
+
+        return $directive;
+    }
+
+    private function handleUnexpectedDirective(DirectiveNode $node) : string {
+        if ($this->canRenderDirective($node)) {
+            throw new \ParseError($this->getUnexpectedDirectiveErrorMessage($node));
         }
 
         if ($node->getParameters()) {
@@ -79,11 +130,37 @@ class PhpTransformVisitor implements NodeVisitor {
         return '@' . $node->getName();
     }
 
-    public function visitInterpolationNode(InterpolationNode $node): mixed {
-        return '<?php echo e(' . trim($node->getContent()) . '); ?>';
+    private function canRenderDirective(DirectiveNode $node) : bool {
+        return !!array_filter($this->directives, function($directive) use ($node) {
+            return $directive->canRender($node);
+        });
     }
 
-    public function visitVerbatimNode(VerbatimNode $node): mixed {
-        return $node->getContent();
+    private function getUnexpectedDirectiveErrorMessage(DirectiveNode $node) : string {
+        if ($directive = end($this->directivesStack)) {
+            [$name] = end($this->directiveOpeningStack);
+
+            return strtr('Expected @:expected, got @:got on line :line', [
+                ':expected' => $directive->getExpected($name),
+                ':got' => $node->getName(),
+                ':line' => $this->line,
+            ]);
+        }
+
+        $directive = $this->getDirectiveRenderer($node);
+
+        return strtr('Expected @:expected, got @:got on line :line', [
+            ':expected' => $directive->getOpeningDirectives()[0] ?? $node->getName(),
+            ':got' => $node->getName(),
+            ':line' => $this->line,
+        ]);
+    }
+
+    private function getDirectiveRenderer(DirectiveNode $node) : ?Directive {
+        $directives = array_filter($this->directives, function($directive) use ($node) {
+            return $directive->canRender($node);
+        });
+
+        return end($directives);
     }
 }
