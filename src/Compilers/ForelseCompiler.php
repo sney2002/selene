@@ -1,10 +1,10 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class ForelseLoopDirective extends Directive {
+class ForelseCompiler extends DirectiveCompiler {
     protected array $hasEmptyStack = [];
     protected array $openingDirectives = ['forelse'];
     protected array $closingDirectives = ['endforelse'];
@@ -18,15 +18,15 @@ class ForelseLoopDirective extends Directive {
         return 'empty';
     }
 
-    public function canRender(DirectiveNode $directive) : bool {
+    public function canCompile(DirectiveNode $directive) : bool {
         if ($directive->getName() === 'empty') {
             return !$directive->getParameters();
         }
 
-        return parent::canRender($directive);
+        return parent::canCompile($directive);
     }
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'forelse':
                 $this->foreachStart();

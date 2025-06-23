@@ -1,6 +1,5 @@
 <?php
-
-namespace Selene\Node;
+namespace Selene\Nodes;
 
 enum NodeType: string {
     case VERBATIM = 'verbatim';

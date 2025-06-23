@@ -2,11 +2,11 @@
 
 namespace Selene\Visitor;
 
-use Selene\Node\CommentNode;
-use Selene\Node\ComponentNode;
-use Selene\Node\DirectiveNode;
-use Selene\Node\InterpolationNode;
-use Selene\Node\VerbatimNode;
+use Selene\Nodes\CommentNode;
+use Selene\Nodes\ComponentNode;
+use Selene\Nodes\DirectiveNode;
+use Selene\Nodes\InterpolationNode;
+use Selene\Nodes\VerbatimNode;
 
 interface NodeVisitor {
     public function visitCommentNode(CommentNode $node): mixed;

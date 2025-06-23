@@ -1,15 +1,14 @@
 <?php
+namespace Selene\Compilers;
 
-namespace Selene\Directives;
+use Selene\Nodes\DirectiveNode;
 
-use Selene\Node\DirectiveNode;
-
-class ConditionalDirectives extends Directive {
+class ConditionalsCompiler extends DirectiveCompiler {
     protected array $openingDirectives = ['if', 'unless', 'isset', 'empty'];
     protected array $closingDirectives = ['endif', 'endunless', 'endisset', 'endempty'];
-    protected array $canRender = ['elseif', 'else'];
+    protected array $canCompile = ['elseif', 'else'];
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'if':
                 return '<?php if (' . $directive->getParameters() . '): ?>';

@@ -1,14 +1,14 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class ForLoopDirective extends Directive {
+class ForCompiler extends DirectiveCompiler {
     protected array $openingDirectives = ['for'];
     protected array $closingDirectives = ['endfor'];
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'for':
                 return '<?php for (' . $directive->getParameters() . '): ?>';

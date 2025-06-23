@@ -1,14 +1,14 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class ForeachLoopDirective extends Directive {
+class ForeachCompiler extends DirectiveCompiler {
     protected array $openingDirectives = ['foreach'];
     protected array $closingDirectives = ['endforeach'];
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'foreach':
                 return '<?php foreach (' . $directive->getParameters() . '): ?>';

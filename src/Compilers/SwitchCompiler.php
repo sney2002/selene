@@ -1,17 +1,17 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class SwitchDirective extends Directive {
+class SwitchCompiler extends DirectiveCompiler {
     protected array $openingDirectives = ['switch'];
     protected array $closingDirectives = ['endswitch'];
-    protected array $canRender = ['case', 'break', 'default'];
+    protected array $canCompile = ['case', 'break', 'default'];
 
     private array $switchStack = [];
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'switch':
                 $this->switchStart();

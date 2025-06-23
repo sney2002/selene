@@ -1,10 +1,9 @@
 <?php
-
-namespace Selene\Node;
+namespace Selene\Nodes;
 
 use Selene\Visitor\NodeVisitor;
 
-class CommentNode implements Node {
+class VerbatimNode implements Node {
     private string $content;
 
     public function __construct(string $content) {
@@ -12,7 +11,7 @@ class CommentNode implements Node {
     }
 
     public function getType(): NodeType {
-        return NodeType::COMMENT;
+        return NodeType::VERBATIM;
     }
 
     public function getContent(): string {
@@ -20,6 +19,6 @@ class CommentNode implements Node {
     }
 
     public function accept(NodeVisitor $visitor): mixed {
-        return $visitor->visitCommentNode($this);
+        return $visitor->visitVerbatimNode($this);
     }
 } 

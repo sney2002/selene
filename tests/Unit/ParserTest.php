@@ -1,11 +1,11 @@
 <?php
 
 use Selene\Parser;
-use Selene\Node\VerbatimNode;
-use Selene\Node\InterpolationNode;
-use Selene\Node\DirectiveNode;
-use Selene\Node\CommentNode;
-use Selene\Node\ComponentNode;
+use Selene\Nodes\VerbatimNode;
+use Selene\Nodes\InterpolationNode;
+use Selene\Nodes\DirectiveNode;
+use Selene\Nodes\CommentNode;
+use Selene\Nodes\ComponentNode;
 
 test('parses a verbatim string', function () {
     $template = 'Hello, world!';

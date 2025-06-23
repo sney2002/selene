@@ -1,14 +1,14 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class WhileLoopDirective extends Directive {
+class WhileCompiler extends DirectiveCompiler {
     protected array $openingDirectives = ['while'];
     protected array $closingDirectives = ['endwhile'];
 
-    public function render(DirectiveNode $directive) : ?string {
+    public function compile(DirectiveNode $directive) : ?string {
         switch ($directive->getName()) {
             case 'while':
                 return '<?php while (' . $directive->getParameters() . '): ?>';

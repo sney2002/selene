@@ -65,7 +65,7 @@ function view(string $template, array $data = []) {
     $nodes = $parser->parse();
     $visitor = new PhpTransformVisitor();
 
-    $result = $visitor->render($nodes);
+    $result = $visitor->compile($nodes);
 
     file_put_contents(__DIR__ . '/output.php', $result);
 
@@ -86,11 +86,11 @@ function e($value) {
     return htmlentities($value);
 }
 
-$parser = new Parser($template);
+$parser = new Parser('@endif');
 $nodes = $parser->parse();
 $visitor = new PhpTransformVisitor();
 
-$result = $visitor->render($nodes);
+$result = $visitor->compile($nodes);
 ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>

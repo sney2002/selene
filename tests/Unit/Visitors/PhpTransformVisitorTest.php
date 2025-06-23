@@ -8,7 +8,7 @@ expect()->extend('toCompile', function ($result) {
     $nodes = $parser->parse();
     $visitor = new PhpTransformVisitor();
 
-    return expect($visitor->render($nodes))->toBe($result);
+    return expect($visitor->compile($nodes))->toBe($result);
 });
 
 test('Compiles a comment', function () {

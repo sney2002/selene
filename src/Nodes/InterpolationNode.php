@@ -1,10 +1,9 @@
 <?php
-
-namespace Selene\Node;
+namespace Selene\Nodes;
 
 use Selene\Visitor\NodeVisitor;
 
-class VerbatimNode implements Node {
+class InterpolationNode implements Node {
     private string $content;
 
     public function __construct(string $content) {
@@ -12,7 +11,7 @@ class VerbatimNode implements Node {
     }
 
     public function getType(): NodeType {
-        return NodeType::VERBATIM;
+        return NodeType::INTERPOLATION;
     }
 
     public function getContent(): string {
@@ -20,6 +19,6 @@ class VerbatimNode implements Node {
     }
 
     public function accept(NodeVisitor $visitor): mixed {
-        return $visitor->visitVerbatimNode($this);
+        return $visitor->visitInterpolationNode($this);
     }
 } 

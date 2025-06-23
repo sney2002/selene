@@ -2,12 +2,12 @@
 
 namespace Selene\Visitor;
 
-use Selene\Node\CommentNode;
-use Selene\Node\ComponentNode;
-use Selene\Node\DirectiveNode;
-use Selene\Node\InterpolationNode;
-use Selene\Node\VerbatimNode;
-use Selene\Directives\Directive;
+use Selene\Nodes\CommentNode;
+use Selene\Nodes\ComponentNode;
+use Selene\Nodes\DirectiveNode;
+use Selene\Nodes\InterpolationNode;
+use Selene\Nodes\VerbatimNode;
+use Selene\Compilers\DirectiveCompiler;
 use Selene\Parser;
 
 class PhpTransformVisitor implements NodeVisitor {
@@ -16,13 +16,13 @@ class PhpTransformVisitor implements NodeVisitor {
     private int $line = 1;
 
     private array $registeredDirectives = [
-        \Selene\Directives\ConditionalDirectives::class,
-        \Selene\Directives\ForelseLoopDirective::class,
-        \Selene\Directives\ForeachLoopDirective::class,
-        \Selene\Directives\ForLoopDirective::class,
-        \Selene\Directives\SwitchDirective::class,
-        \Selene\Directives\WhileLoopDirective::class,
-        \Selene\Directives\BooleanAttributeDirective::class,
+        \Selene\Compilers\ConditionalsCompiler::class,
+        \Selene\Compilers\ForelseCompiler::class,
+        \Selene\Compilers\ForeachCompiler::class,
+        \Selene\Compilers\ForCompiler::class,
+        \Selene\Compilers\SwitchCompiler::class,
+        \Selene\Compilers\WhileCompiler::class,
+        \Selene\Compilers\BooleanAttributeCompiler::class,
     ];
 
     private array $directives = [];
@@ -33,7 +33,7 @@ class PhpTransformVisitor implements NodeVisitor {
         }
     }
 
-    public function render(array $nodes) : string {
+    public function compile(array $nodes) : string {
         $output = '';
 
         foreach ($nodes as $node) {
@@ -89,7 +89,7 @@ class PhpTransformVisitor implements NodeVisitor {
             array_pop($this->directiveOpeningStack);
         }
 
-        return $directive->render($node);
+        return $directive->compile($node);
     }
 
     public function visitInterpolationNode(InterpolationNode $node): mixed {
@@ -103,7 +103,7 @@ class PhpTransformVisitor implements NodeVisitor {
     private function getDirective(DirectiveNode $node) {
         $directive = end($this->directivesStack);
 
-        if ($directive && $directive->canRender($node)) {
+        if ($directive && $directive->canCompile($node)) {
             return $directive;
         }
 
@@ -120,7 +120,7 @@ class PhpTransformVisitor implements NodeVisitor {
     }
 
     private function handleUnexpectedDirective(DirectiveNode $node) : string {
-        if ($this->canRenderDirective($node)) {
+        if ($this->canCompileDirective($node)) {
             throw new \ParseError($this->getUnexpectedDirectiveErrorMessage($node));
         }
 
@@ -131,9 +131,9 @@ class PhpTransformVisitor implements NodeVisitor {
         return '@' . $node->getName();
     }
 
-    private function canRenderDirective(DirectiveNode $node) : bool {
+    private function canCompileDirective(DirectiveNode $node) : bool {
         return !!array_filter($this->directives, function($directive) use ($node) {
-            return $directive->canRender($node);
+            return $directive->canCompile($node);
         });
     }
 
@@ -157,9 +157,9 @@ class PhpTransformVisitor implements NodeVisitor {
         ]);
     }
 
-    private function getDirectiveRenderer(DirectiveNode $node) : ?Directive {
+    private function getDirectiveRenderer(DirectiveNode $node) : ?DirectiveCompiler {
         $directives = array_filter($this->directives, function($directive) use ($node) {
-            return $directive->canRender($node);
+            return $directive->canCompile($node);
         });
 
         return end($directives);

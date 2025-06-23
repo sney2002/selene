@@ -1,10 +1,9 @@
 <?php
-
-namespace Selene\Node;
+namespace Selene\Nodes;
 
 use Selene\Visitor\NodeVisitor;
 
-class InterpolationNode implements Node {
+class CommentNode implements Node {
     private string $content;
 
     public function __construct(string $content) {
@@ -12,7 +11,7 @@ class InterpolationNode implements Node {
     }
 
     public function getType(): NodeType {
-        return NodeType::INTERPOLATION;
+        return NodeType::COMMENT;
     }
 
     public function getContent(): string {
@@ -20,6 +19,6 @@ class InterpolationNode implements Node {
     }
 
     public function accept(NodeVisitor $visitor): mixed {
-        return $visitor->visitInterpolationNode($this);
+        return $visitor->visitCommentNode($this);
     }
 } 

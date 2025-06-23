@@ -1,16 +1,16 @@
 <?php
 
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-abstract class Directive {
+abstract class DirectiveCompiler {
     protected array $openingDirectives = [];
     protected array $closingDirectives = [];
-    protected array $canRender = [];
+    protected array $canCompile = [];
 
-    public function canRender(DirectiveNode $directive) : bool {
-        return (in_array($directive->getName(), $this->canRender) || 
+    public function canCompile(DirectiveNode $directive) : bool {
+        return (in_array($directive->getName(), $this->canCompile) || 
                in_array($directive->getName(), $this->closingDirectives)) &&
                !in_array($directive->getName(), $this->openingDirectives);
     }
@@ -39,5 +39,5 @@ abstract class Directive {
         return 'end' . $directiveName;
     }
 
-    abstract public function render(DirectiveNode $directive) : ?string;
+    abstract public function compile(DirectiveNode $directive) : ?string;
 }

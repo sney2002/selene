@@ -1,6 +1,5 @@
 <?php
-
-namespace Selene\Node;
+namespace Selene\Nodes;
 
 use Selene\Visitor\NodeVisitor;
 

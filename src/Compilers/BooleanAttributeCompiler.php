@@ -1,13 +1,13 @@
 <?php
-namespace Selene\Directives;
+namespace Selene\Compilers;
 
-use Selene\Node\DirectiveNode;
+use Selene\Nodes\DirectiveNode;
 
-class BooleanAttributeDirective extends Directive
+class BooleanAttributeCompiler extends DirectiveCompiler
 {
     protected array $openingDirectives = ['checked', 'selected', 'disabled', 'readonly', 'required'];
 
-    public function render(DirectiveNode $node) : string
+    public function compile(DirectiveNode $node) : string
     {
         switch ($node->getName()) {
             case 'checked':
