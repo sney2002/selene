@@ -404,12 +404,12 @@ test('whitespaces between attributes', function () {
     $whiteSpaceChars = [' ', "\n", "\t", "\r"];
 
     foreach ($whiteSpaceChars as $whiteSpaceChar) {
-        $template = "<x-parent{$whiteSpaceChar}enabled{$whiteSpaceChar}name='John'{$whiteSpaceChar}class='bg-red-500'{$whiteSpaceChar}/>";
+        $template = "<x-parent{$whiteSpaceChar}enabled{$whiteSpaceChar}name='John'{$whiteSpaceChar}type=text{$whiteSpaceChar}class='bg-red-500'{$whiteSpaceChar}/>";
         $parser = new Parser($template);
         $result = $parser->parse();
 
         expect($result)->toEqualCanonicalizing([
-            new ComponentNode('parent', ['enabled' => '', 'name' => 'John', 'class' => 'bg-red-500'], [])
+            new ComponentNode('parent', ['enabled' => '', 'name' => 'John', 'type' => 'text', 'class' => 'bg-red-500'], [])
         ]);
     }
 });

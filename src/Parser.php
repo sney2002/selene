@@ -200,7 +200,7 @@ class Parser
             return $this->getString();
         }
 
-        return $this->getContentUntilAny([' ', '>', '/>']);
+        return $this->getContentUntilAny(['>', '/>', self::WHITESPACE]);
     }
 
     private function getComponentContent(string $name): string
