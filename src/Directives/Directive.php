@@ -20,6 +20,10 @@ abstract class Directive {
     }
 
     public function hasClosingDirective(string $directiveName) : bool {
+        if (empty($this->closingDirectives)) {
+            return in_array($directiveName, $this->openingDirectives);
+        }
+
         return in_array($directiveName, $this->closingDirectives);
     }
 

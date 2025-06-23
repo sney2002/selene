@@ -151,6 +151,11 @@ test('Compiles a switch directive', function () {
         <?php endswitch; ?>');
 });
 
+test('Compiles a boolean attribute directive', function () {
+    $template = '<input type="checkbox" @checked(true)>';
+    expect($template)->toCompile('<input type="checkbox" <?php if (true): echo \'checked\'; endif; ?>>');
+});
+
 test('Throws an error if a directive is not closed', function () {
     $template = '@if(true)
         <p>True</p>

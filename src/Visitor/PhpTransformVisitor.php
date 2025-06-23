@@ -22,6 +22,7 @@ class PhpTransformVisitor implements NodeVisitor {
         \Selene\Directives\ForLoopDirective::class,
         \Selene\Directives\SwitchDirective::class,
         \Selene\Directives\WhileLoopDirective::class,
+        \Selene\Directives\BooleanAttributeDirective::class,
     ];
 
     private array $directives = [];
