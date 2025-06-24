@@ -133,6 +133,24 @@ test('Compiles a forelse directive', function () {
     <?php endif; ?>');
 });
 
+test('Compiles a continue directive', function () {
+    $template = '@while(true)
+        @continue
+    @endwhile';
+    expect($template)->toCompile('<?php while (true): ?>
+        <?php continue; ?>
+    <?php endwhile; ?>');
+});
+
+test('Compiles a break directive', function () {
+    $template = '@while(true)
+        @break
+    @endwhile';
+    expect($template)->toCompile('<?php while (true): ?>
+        <?php break; ?>
+    <?php endwhile; ?>');
+});
+
 test('Compiles a switch directive', function () {
     $template = '@switch($variable)
         @case(1)

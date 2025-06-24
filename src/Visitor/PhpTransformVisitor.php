@@ -22,6 +22,7 @@ class PhpTransformVisitor implements NodeVisitor {
         \Selene\Compilers\ForCompiler::class,
         \Selene\Compilers\SwitchCompiler::class,
         \Selene\Compilers\WhileCompiler::class,
+        \Selene\Compilers\LoopControlCompiler::class,
         \Selene\Compilers\BooleanAttributeCompiler::class,
     ];
 
