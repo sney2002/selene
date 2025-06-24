@@ -4,7 +4,7 @@ namespace Selene\Compilers;
 
 use Selene\Nodes\DirectiveNode;
 
-class ForCompiler extends DirectiveCompiler {
+class ForCompiler extends LoopCompiler {
     protected array $openingDirectives = ['for'];
     protected array $closingDirectives = ['endfor'];
 

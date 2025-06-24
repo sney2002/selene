@@ -15,6 +15,10 @@ abstract class DirectiveCompiler {
                !in_array($directive->getName(), $this->openingDirectives);
     }
 
+    public function validateContext(DirectiveNode $directive, array $directiveStack) : bool {
+        return true;
+    }
+
     public function hasOpeningDirective(string $directiveName) : bool {
         return in_array($directiveName, $this->openingDirectives);
     }

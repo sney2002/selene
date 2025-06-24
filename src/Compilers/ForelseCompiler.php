@@ -4,7 +4,7 @@ namespace Selene\Compilers;
 
 use Selene\Nodes\DirectiveNode;
 
-class ForelseCompiler extends DirectiveCompiler {
+class ForelseCompiler extends LoopCompiler {
     protected array $hasEmptyStack = [];
     protected array $openingDirectives = ['forelse'];
     protected array $closingDirectives = ['endforelse'];
@@ -16,6 +16,10 @@ class ForelseCompiler extends DirectiveCompiler {
         }
 
         return 'empty';
+    }
+
+    public function isClosed() : bool {
+        return $this->hasEmpty();
     }
 
     public function canCompile(DirectiveNode $directive) : bool {

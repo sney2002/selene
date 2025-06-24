@@ -23,4 +23,18 @@ class LoopControlCompiler extends DirectiveCompiler {
                 return null;
         }
     }
+
+    public function getExpected(string $directiveName) : string {
+        return 'loop';
+    }
+
+    public function validateContext(DirectiveNode $directive, array $directiveStack) : bool {
+        foreach ($directiveStack as $compiler) {
+            if ($compiler instanceof LoopCompiler && ! $compiler->isClosed()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

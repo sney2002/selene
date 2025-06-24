@@ -206,3 +206,13 @@ test('Throws an error if the first directive found is not valid', function () {
 
     expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Expected @if, got @endif on line 2'));
 });
+
+test('Throws an error if a continue directive is found outside a loop', function () {
+    $template = 'if (true) @continue @endif';
+    expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Directive @continue outside of loop on line 1'));
+});
+
+test('Throws an error if a break directive is found outside a loop', function () {
+    $template = 'if (true) @break @endif';
+    expect(fn () => expect($template)->toCompile(''))->toThrow(new \ParseError('Directive @break outside of loop on line 1'));
+});

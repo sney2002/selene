@@ -18,7 +18,8 @@ $template = <<<'TEMPLATE'
 @endforelse
 
 <ul>
-    @foreach ($items as $item)
+    @foreach ($items as $index => $item)
+        @break($index === 2)
         <li>{{ $item }}</li>
     @endforeach
 </ul>

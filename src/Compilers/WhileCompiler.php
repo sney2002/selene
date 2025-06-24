@@ -4,7 +4,7 @@ namespace Selene\Compilers;
 
 use Selene\Nodes\DirectiveNode;
 
-class WhileCompiler extends DirectiveCompiler {
+class WhileCompiler extends LoopCompiler {
     protected array $openingDirectives = ['while'];
     protected array $closingDirectives = ['endwhile'];
 

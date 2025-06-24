@@ -85,6 +85,10 @@ class PhpTransformVisitor implements NodeVisitor {
             return $this->handleUnexpectedDirective($node);
         }
 
+        if (! $compiler->validateContext($node, $this->directivesStack)) {
+            $this->handleUnexpectedDirectiveContext($compiler, $node);
+        }
+
         if ($compiler->hasClosingDirective($node->getName())) {
             array_pop($this->directivesStack);
             array_pop($this->directiveOpeningStack);
@@ -160,6 +164,11 @@ class PhpTransformVisitor implements NodeVisitor {
             ':got' => $node->getName(),
             ':line' => $this->line,
         ]);
+    }
+
+    private function handleUnexpectedDirectiveContext(DirectiveCompiler $compiler, DirectiveNode $node) : void {
+        $expected = $compiler->getExpected($node->getName());
+        throw new \ParseError("Directive @{$node->getName()} outside of {$expected} on line {$this->line}");
     }
 
     private function getDirectiveCompiler(DirectiveNode $node) : ?DirectiveCompiler {
