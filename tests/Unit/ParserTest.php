@@ -39,6 +39,18 @@ test('parses a template with a single interpolation', function () {
     ]);
 });
 
+test('parses a template with a single unescaped interpolation', function () {
+    $template = 'Hello, {!! name !!}!';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+    
+    expect($result)->toEqualCanonicalizing([
+        new VerbatimNode('Hello, '),
+        new InterpolationNode(' name ', false),
+        new VerbatimNode('!')
+    ]);
+});
+
 test('parses string interpolation with curly braces inside double quotes', function () {
     $template = 'Hello, {{ "}" }}!';
     $parser = new Parser($template);

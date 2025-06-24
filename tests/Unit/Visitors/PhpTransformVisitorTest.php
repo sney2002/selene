@@ -23,6 +23,12 @@ test('Compiles an echo directive', function () {
     expect($template)->toCompile('<?php echo e($variable); ?>');
 });
 
+test('Compiles an unescaped interpolation', function () {
+    $template = '{!! $variable !!}';
+
+    expect($template)->toCompile('<?php echo $variable; ?>');
+});
+
 
 test('Compiles an if directive', function () {
     $template = '@if(true)

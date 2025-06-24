@@ -29,7 +29,8 @@ class Parser
             $this->nodes[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
                 $this->current(3) === '<x-' => $this->parseComponent(),
-                $this->current(2) === '{{' => $this->parseInterpolation(),
+                $this->current(2) === '{{' => $this->parseInterpolation(escaped: true),
+                $this->current(3) === '{!!' => $this->parseInterpolation(escaped: false),
                 $this->current() === '@' => $this->parseDirective(),
                 default => $this->parseVerbatim(),
             };
@@ -38,13 +39,17 @@ class Parser
         return $this->nodes;
     }
 
-    private function parseInterpolation(): Node
+    private function parseInterpolation(bool $escaped = true): Node
     {
-        $this->consume('{{');
+        $opening = $escaped ? '{{' : '{!!';
+        $closing = $escaped ? '}}' : '!!}';
+        $closingLength = strlen($closing);
+
+        $this->consume($opening);
 
         $start = $this->index;
 
-        while (!$this->eof() && $this->current(2) !== '}}') {
+        while (!$this->eof() && $this->current($closingLength) !== $closing) {
             if ($this->current() === '"' || $this->current() === "'") {
                 $this->getString();
             }
@@ -54,9 +59,9 @@ class Parser
 
         $content = substr($this->template, $start, $this->index - $start);
 
-        $this->consume('}}');
+        $this->consume($closing);
 
-        return new InterpolationNode($content);
+        return new InterpolationNode($content, $escaped);
     }
 
     private function parseDirective(): Node
@@ -90,7 +95,7 @@ class Parser
 
     private function parseVerbatim(): Node
     {
-        $content = $this->getContentUntilAny(['{{', '<x-', '@']);
+        $content = $this->getContentUntilAny(['{{', '{!!', '<x-', '@']);
 
         return new VerbatimNode($content);
     }

@@ -25,11 +25,11 @@ class PhpTransformVisitor implements NodeVisitor {
         \Selene\Compilers\BooleanAttributeCompiler::class,
     ];
 
-    private array $directives = [];
+    private array $compilers = [];
 
     public function __construct() {
         foreach ($this->registeredDirectives as $directive) {
-            $this->directives[] = new $directive();
+            $this->compilers[] = new $directive();
         }
     }
 
@@ -78,45 +78,49 @@ class PhpTransformVisitor implements NodeVisitor {
     }
 
     public function visitDirectiveNode(DirectiveNode $node): mixed {
-        $directive = $this->getDirective($node);
+        $compiler = $this->findDirectiveCompilerForNode($node);
 
-        if (! $directive) {
+        if (! $compiler) {
             return $this->handleUnexpectedDirective($node);
         }
 
-        if ($directive->hasClosingDirective($node->getName())) {
+        if ($compiler->hasClosingDirective($node->getName())) {
             array_pop($this->directivesStack);
             array_pop($this->directiveOpeningStack);
         }
 
-        return $directive->compile($node);
+        return $compiler->compile($node);
     }
 
     public function visitInterpolationNode(InterpolationNode $node): mixed {
-        return '<?php echo e(' . trim($node->getContent()) . '); ?>';
+        if ($node->isEscaped()) {
+            return '<?php echo e(' . trim($node->getContent()) . '); ?>';
+        }
+
+        return '<?php echo ' . trim($node->getContent()) . '; ?>';
     }
 
     public function visitVerbatimNode(VerbatimNode $node): mixed {
         return $node->getContent();
     }
 
-    private function getDirective(DirectiveNode $node) {
-        $directive = end($this->directivesStack);
+    private function findDirectiveCompilerForNode(DirectiveNode $node) {
+        $currentCompiler = end($this->directivesStack);
 
-        if ($directive && $directive->canCompile($node)) {
-            return $directive;
+        if ($currentCompiler && $currentCompiler->canCompile($node)) {
+            return $currentCompiler;
         }
 
-        $directives = array_filter($this->directives, function($directive) use ($node) {
-            return $directive->hasOpeningDirective($node->getName());
+        $compilers = array_filter($this->compilers, function($compiler) use ($node) {
+            return $compiler->hasOpeningDirective($node->getName());
         });
 
-        if ($directive = end($directives)) {
-            $this->directivesStack[] = $directive;
+        if ($compiler = end($compilers)) {
+            $this->directivesStack[] = $compiler;
             $this->directiveOpeningStack[] = [$node->getName(), $this->line];
         }
 
-        return $directive;
+        return $compiler;
     }
 
     private function handleUnexpectedDirective(DirectiveNode $node) : string {
@@ -132,8 +136,8 @@ class PhpTransformVisitor implements NodeVisitor {
     }
 
     private function canCompileDirective(DirectiveNode $node) : bool {
-        return !!array_filter($this->directives, function($directive) use ($node) {
-            return $directive->canCompile($node);
+        return !!array_filter($this->compilers, function($compiler) use ($node) {
+            return $compiler->canCompile($node);
         });
     }
 
@@ -148,7 +152,7 @@ class PhpTransformVisitor implements NodeVisitor {
             ]);
         }
 
-        $directive = $this->getDirectiveRenderer($node);
+        $directive = $this->getDirectiveCompiler($node);
 
         return strtr('Expected @:expected, got @:got on line :line', [
             ':expected' => $directive->getOpeningDirectives()[0] ?? $node->getName(),
@@ -157,9 +161,9 @@ class PhpTransformVisitor implements NodeVisitor {
         ]);
     }
 
-    private function getDirectiveRenderer(DirectiveNode $node) : ?DirectiveCompiler {
-        $directives = array_filter($this->directives, function($directive) use ($node) {
-            return $directive->canCompile($node);
+    private function getDirectiveCompiler(DirectiveNode $node) : ?DirectiveCompiler {
+        $directives = array_filter($this->compilers, function($compiler) use ($node) {
+            return $compiler->canCompile($node);
         });
 
         return end($directives);

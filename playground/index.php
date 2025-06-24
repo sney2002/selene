@@ -7,6 +7,7 @@ use Selene\Parser;
 
 $template = <<<'TEMPLATE'
 {{-- This is a comment --}}
+{!! $html !!}
 @forelse($emptyArray as $item)
     <p>{{ $item }}</p>
     @empty($emptyVariable)
@@ -86,7 +87,7 @@ function e($value) {
     return htmlentities($value);
 }
 
-$parser = new Parser('@endif');
+$parser = new Parser($template);
 $nodes = $parser->parse();
 $visitor = new PhpTransformVisitor();
 
@@ -135,5 +136,6 @@ className:"template-tag"}]})})());
     'variable' => 1,
     'emptyVariable' => null,
     'emptyArray' => [],
+    'html' => '<h2 style="border: 2px dashed red;">Unescaped HTML</h2>',
     'items' => ['item 1', 'item 2', 'item 3'],
 ]); ?>

@@ -5,9 +5,15 @@ use Selene\Visitor\NodeVisitor;
 
 class InterpolationNode implements Node {
     private string $content;
+    private bool $escaped;
 
-    public function __construct(string $content) {
+    public function __construct(string $content, bool $escaped = true) {
         $this->content = $content;
+        $this->escaped = $escaped;
+    }
+
+    public function isEscaped(): bool {
+        return $this->escaped;
     }
 
     public function getType(): NodeType {
