@@ -94,6 +94,7 @@ $visitor = new PhpTransformVisitor();
 
 $result = $visitor->compile($nodes);
 ?>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 <script>
@@ -117,13 +118,13 @@ className:"template-tag"}]})})());
 </style>
 <div style="display: flex; gap: 20px">
     <div style="flex: 1">
-        <h2>Template</h2>
+        <h2 class="text-2xl font-bold mb-4">Template</h2>
         <pre>
             <code class="language-blade"><?php echo htmlspecialchars($template); ?></code>
         </pre>
     </div>
     <div style="flex: 1">
-        <h2>Result</h2>
+        <h2 class="text-2xl font-bold mb-10">Result</h2>
         <pre>
             <code class="language-php"><?php echo htmlspecialchars($result); ?></code>
         </pre>
