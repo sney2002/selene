@@ -60,6 +60,23 @@ describe('sections', function() {
         expect($view->hasSection('section2'))->toBeFalse();
     });
 
+    test('can include the content of the parent section', function() {
+        $view = new View();
+        $view->section('section', '[parent]');
+       
+        $view->section('section');
+        $view->parentContent();
+        echo '[child]';
+        $view->endSection();
+
+        $view->section('section');
+        $view->parentContent();
+        echo '[child2]';
+        $view->endSection();
+
+        expect($view->yield('section'))->toBe('[parent][child][child2]');
+    });
+
     test('Throws an exception if a section is closed without being opened', function() {
         $view = new View();
 
