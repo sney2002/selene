@@ -103,11 +103,12 @@ class View {
      * Get the content of a section by name.
      * 
      * @param string $section The name of the section to retrieve
+     * @param string $default The default value to return if the section is not defined
      * @return string The section content or empty string if not found
      */
-    public function yield(string $section) : string {
+    public function yield(string $section, string $default = '') : string {
         if (empty($this->parentSections[$section])) {
-            return implode('', $this->sections[$section] ?? []);
+            return implode('', $this->sections[$section] ?? [$default]);
         }
 
         $sectionContentStack = $this->getSectionContentStack($section);

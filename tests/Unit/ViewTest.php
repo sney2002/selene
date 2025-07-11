@@ -82,4 +82,10 @@ describe('sections', function() {
 
         expect(fn() => $view->endSection())->toThrow(new \InvalidArgumentException('Cannot end a section without opening one'));
     });
+
+    test('yield default value if the section is not defined', function() {
+        $view = new View();
+
+        expect($view->yield('section', 'Hello, world!'))->toBe('Hello, world!');
+    });
 });
