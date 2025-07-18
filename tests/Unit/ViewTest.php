@@ -88,9 +88,9 @@ describe('sections', function() {
         $view->parentContent();
         echo '[child2]';
         $view->endSection();
-       
+        
         expect($view->yield('section'))->toBe('[child1][child2]');
-    })->only();
+    });
 
     test('Throws an exception if a section is closed without being opened', function() {
         $view = new View();
@@ -102,5 +102,101 @@ describe('sections', function() {
         $view = new View();
 
         expect($view->yield('section', 'Hello, world!'))->toBe('Hello, world!');
+    });
+});
+
+describe('stacks', function() {
+    test('can push content to a stack with a string', function() {
+        $view = new View();
+        $view->push('stack', 'Hello, world!');
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can push content between @push and @endpush', function() {
+        $view = new View();
+        $view->push('stack');
+        echo 'Hello, world!';
+        $view->endPush();
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can push multiple times to the same stack', function() {
+        $view = new View();
+
+        $view->push('stack');
+        echo 'Hello, ';
+        $view->endPush();
+
+        $view->push('stack');
+        echo 'world!';
+        $view->endPush();
+
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can prepend content to a stack with a string', function() {
+        $view = new View();
+        $view->prepend('stack', 'Hello, world!');
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can prepend content to a stack between @push and @endpush', function() {
+        $view = new View();
+        $view->prepend('stack');
+        echo 'Hello, world!';
+        $view->endPrepend();
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can prepend multiple times to the same stack', function() {
+        $view = new View();
+
+        $view->prepend('stack');
+        echo 'world!';
+        $view->endPrepend();
+
+        $view->prepend('stack');
+        echo 'Hello, ';
+        $view->endPrepend();
+
+        expect($view->yieldStack('stack'))->toBe('Hello, world!');
+    });
+
+    test('can combine push and prepend', function() {
+        $view = new View();
+
+        $view->push('stack');
+        echo 'Hello, ';
+        $view->endPush();
+
+        $view->push('stack');
+        echo 'world!';
+        $view->endPush();
+
+        $view->prepend('stack');
+        echo 'mundo!';
+        $view->endPrepend();
+
+        $view->prepend('stack');
+        echo '!Hola, ';
+        $view->endPrepend();
+
+        expect($view->yieldStack('stack'))->toBe('!Hola, mundo!Hello, world!');
+    });
+
+    test('yieldStack returns an empty string if the stack is not defined', function() {
+        $view = new View();
+        expect($view->yieldStack('stack'))->toBe('');
+    });
+
+    test('Throws an exception if a push is closed without being opened', function() {
+        $view = new View();
+
+        expect(fn() => $view->endPush())->toThrow(new \InvalidArgumentException('Cannot end a push without opening one'));
+    });
+
+    test('Throws an exception if a prepend is closed without being opened', function() {
+        $view = new View();
+        expect(fn() => $view->endPrepend())->toThrow(new \InvalidArgumentException('Cannot end a prepend without opening one'));
     });
 });
