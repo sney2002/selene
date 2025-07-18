@@ -88,6 +88,11 @@ class View {
      */
     public function parentContent() : void {
         $section = end($this->sectionStack);
+
+        if (empty($this->parentSections[$section])) {
+            return;
+        }
+
         $content = trim(ob_get_clean());
 
         if ($content) {
