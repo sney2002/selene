@@ -439,3 +439,26 @@ test('parses components with nested interpolations', function () {
         ])
     ]);
 });
+
+test('Can escape a directive with @@', function () {
+    $template = '@@if(true)';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toEqualCanonicalizing([
+        new VerbatimNode('if(true)')
+    ]);
+});
+
+test('Captures @ as verbatim if it is not followed by a directive', function () {
+    $templates = ['@', '@@'];
+
+    foreach ($templates as $template) {
+        $parser = new Parser($template);
+        $result = $parser->parse();
+
+        expect($result)->toEqualCanonicalizing([
+            new VerbatimNode($template)
+        ]);
+    }
+});

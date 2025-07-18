@@ -17,6 +17,11 @@ $template = <<<'TEMPLATE'
     <p>Forelse Empty</p>
 @endforelse
 
+@{{ 'hola' }}
+
+@@if(   true   ? 1 : 2    )
+@@endif
+
 <ul>
     @foreach ($items as $index => $item)
         @break($index === 2)

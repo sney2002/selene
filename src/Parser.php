@@ -31,6 +31,7 @@ class Parser
                 $this->current(3) === '<x-' => $this->parseComponent(),
                 $this->current(2) === '{{' => $this->parseInterpolation(escaped: true),
                 $this->current(3) === '{!!' => $this->parseInterpolation(escaped: false),
+                $this->current(2) === '@@' => $this->parseDirective(verbatim: true),
                 $this->current() === '@' => $this->parseDirective(),
                 default => $this->parseVerbatim(),
             };
@@ -64,9 +65,10 @@ class Parser
         return new InterpolationNode($content, $escaped);
     }
 
-    private function parseDirective(): Node
+    private function parseDirective(bool $verbatim = false): Node
     {
-        $this->consume('@');
+        $opening = $verbatim ? '@@' : '@';
+        $this->consume($opening);
 
         $start = $this->index;
 
@@ -76,9 +78,18 @@ class Parser
 
         $name = substr($this->template, $start, $this->index - $start);
 
-        $this->consumeUntilAny(["\n", self::PRINTABLE]);
+        if (! $name) {
+            return new VerbatimNode($opening);
+        }
 
+        $this->consumeUntilAny(["\n", self::PRINTABLE]);
+        
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
+
+        if ($verbatim) {
+            $rawParameters = $parameters ? '(' . $parameters . ')' : '';
+            return new VerbatimNode($name . $rawParameters);
+        }
 
         return new DirectiveNode(trim($name), $parameters);
     }
