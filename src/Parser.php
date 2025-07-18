@@ -13,6 +13,7 @@ class Parser
 {
     const WHITESPACE = 'ctype_space';
     const PRINTABLE = 'ctype_graph';
+    const ALPHA = 'ctype_alpha';
 
     private int $index = 0;
     private string $template;
@@ -70,20 +71,14 @@ class Parser
         $opening = $verbatim ? '@@' : '@';
         $this->consume($opening);
 
-        $start = $this->index;
-
-        while (!$this->eof() && ctype_alpha($this->current())) {
-            $this->consume();
-        }
-
-        $name = substr($this->template, $start, $this->index - $start);
+        $name = $this->getContentWhile(self::ALPHA);
 
         if (! $name) {
             return new VerbatimNode($opening);
         }
 
         $this->consumeUntilAny(["\n", self::PRINTABLE]);
-        
+
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
         if ($verbatim) {
@@ -310,11 +305,31 @@ class Parser
      * @param string $token The token to consume until
      * @return string
      */
-    private function getContentUntil(string $token): string
+    private function getContentUntil(string|callable $condition): string
     {
         $start = $this->index;
-        $this->consumeUntil($token);
+        $this->consumeUntil($condition);
         return substr($this->template, $start, $this->index - $start);
+    }
+
+    private function getContentWhile(callable $condition): string
+    {
+        $start = $this->index;
+        $this->consumeWhile($condition);
+        return substr($this->template, $start, $this->index - $start);
+    }
+
+    /**
+     * Consumes characters from the template while the given condition is true
+     * 
+     * @param callable $condition The condition to consume while
+     * @return void
+     */
+    private function consumeWhile(callable $condition): void
+    {
+        while (!$this->eof() && $condition($this->current())) {
+            $this->consume();
+        }
     }
 
     /**
@@ -323,11 +338,19 @@ class Parser
      * @param string $token The token to consume until
      * @return void
      */
-    private function consumeUntil(string $token): void
+    private function consumeUntil(string|callable $condition): void
     {
-        $tokenLength = strlen($token);
+        if (is_callable($condition)) {
+            while (!$this->eof() && ! $condition($this->current())) {
+                $this->consume();
+            }
 
-        while (!$this->eof() && $this->current($tokenLength) !== $token) {
+            return;
+        }
+
+        $tokenLength = strlen($condition);
+
+        while (!$this->eof() && $this->current($tokenLength) !== $condition) {
             $this->consume();
         }
     }
