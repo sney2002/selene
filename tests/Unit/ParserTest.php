@@ -462,3 +462,13 @@ test('Captures @ as verbatim if it is not followed by a directive', function () 
         ]);
     }
 });
+
+test('Escapes interpolation preceded by @', function () {
+    $template = '@{{ name }}';
+    $parser = new Parser($template);
+    $result = $parser->parse();
+
+    expect($result)->toEqualCanonicalizing([
+        new VerbatimNode('{{ name }}')
+    ]);
+});

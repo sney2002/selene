@@ -30,9 +30,10 @@ class Parser
             $this->nodes[] = match (true) {
                 $this->current(4) === '{{--' => $this->parseComment(),
                 $this->current(3) === '<x-' => $this->parseComponent(),
-                $this->current(2) === '{{' => $this->parseInterpolation(escaped: true),
                 $this->current(3) === '{!!' => $this->parseInterpolation(escaped: false),
-                $this->current(2) === '@@' => $this->parseDirective(verbatim: true),
+                $this->current(3) === '@{{' => $this->parseEscapedInterpolation(),
+                $this->current(2) === '{{' => $this->parseInterpolation(escaped: true),
+                $this->current(2) === '@@' => $this->parseEscapedDirective(),
                 $this->current() === '@' => $this->parseDirective(),
                 default => $this->parseVerbatim(),
             };
@@ -42,6 +43,20 @@ class Parser
     }
 
     private function parseInterpolation(bool $escaped = true): Node
+    {
+        $content = $this->getInterpolationContent($escaped);
+
+        return new InterpolationNode($content, $escaped);
+    }
+
+    private function parseEscapedInterpolation(): Node
+    {
+        $this->consume('@');
+
+        return new VerbatimNode('{{' . $this->getInterpolationContent() . '}}');
+    }
+
+    private function getInterpolationContent(bool $escaped = true): string
     {
         $opening = $escaped ? '{{' : '{!!';
         $closing = $escaped ? '}}' : '!!}';
@@ -63,30 +78,46 @@ class Parser
 
         $this->consume($closing);
 
-        return new InterpolationNode($content, $escaped);
+        return $content;
     }
 
-    private function parseDirective(bool $verbatim = false): Node
+    private function parseDirective(): Node
     {
-        $opening = $verbatim ? '@@' : '@';
-        $this->consume($opening);
-
-        $name = $this->getContentWhile(self::ALPHA);
+        [$name, $parameters] = $this->getDirective();
 
         if (! $name) {
-            return new VerbatimNode($opening);
+            return new VerbatimNode('@');
         }
+
+        return new DirectiveNode($name, $parameters);
+    }
+
+    private function parseEscapedDirective(): Node
+    {
+        $this->consume('@');
+
+        [$name, $parameters] = $this->getDirective();
+
+        if (! $name) {
+            return new VerbatimNode('@@');
+        }
+
+        $rawParameters = $parameters ? '(' . $parameters . ')' : '';
+
+        return new VerbatimNode($name . $rawParameters);
+    }
+
+    private function getDirective(): array
+    {
+        $this->consume('@');
+
+        $name = $this->getContentWhile(self::ALPHA);
 
         $this->consumeUntilAny(["\n", self::PRINTABLE]);
 
         $parameters = $this->current() === '(' ? $this->consumeParenthesesContent() : '';
 
-        if ($verbatim) {
-            $rawParameters = $parameters ? '(' . $parameters . ')' : '';
-            return new VerbatimNode($name . $rawParameters);
-        }
-
-        return new DirectiveNode(trim($name), $parameters);
+        return [$name, $parameters];
     }
 
     private function parseComment(): Node {

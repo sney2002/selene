@@ -19,8 +19,13 @@ $template = <<<'TEMPLATE'
 
 @{{ 'hola' }}
 
-@@if(   true   ? 1 : 2    )
-@@endif
+@@if (true ? 1 : 2) {
+    console.log('hola');
+}
+
+// Not a directive
+@
+@@
 
 <ul>
     @foreach ($items as $index => $item)
