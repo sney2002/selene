@@ -73,7 +73,7 @@ class PhpTransformVisitor implements NodeVisitor {
             $output .= $child->accept($this);
         }
 
-        $output .= '</x-' . $node->getName() . '>';
+        $output .= '<\/x-' . $node->getName() . '>';
 
         return $output;
     }
