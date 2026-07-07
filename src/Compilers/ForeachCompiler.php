@@ -5,17 +5,11 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 class ForeachCompiler extends LoopCompiler {
-    protected array $openingDirectives = ['foreach'];
-    protected array $closingDirectives = ['endforeach'];
+    public function compileForeach(DirectiveNode $node) : string {
+        return '<?php foreach (' . $node->getParameters() . '): ?>';
+    }
 
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'foreach':
-                return '<?php foreach (' . $directive->getParameters() . '): ?>';
-            case 'endforeach':
-                return '<?php endforeach; ?>';
-        }
-
-        return null;
+    public function compileEndforeach(DirectiveNode $node) : string {
+        return '<?php endforeach; ?>';
     }
 }

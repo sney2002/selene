@@ -5,17 +5,11 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 class ForCompiler extends LoopCompiler {
-    protected array $openingDirectives = ['for'];
-    protected array $closingDirectives = ['endfor'];
+    public function compileFor(DirectiveNode $node) : string {
+        return '<?php for (' . $node->getParameters() . '): ?>';
+    }
 
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'for':
-                return '<?php for (' . $directive->getParameters() . '): ?>';
-            case 'endfor':
-                return '<?php endfor; ?>';
-        }
-
-        return null;
+    public function compileEndfor(DirectiveNode $node) : string {
+        return '<?php endfor; ?>';
     }
 }

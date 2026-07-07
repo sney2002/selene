@@ -5,14 +5,26 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 abstract class DirectiveCompiler {
-    protected array $openingDirectives = [];
-    protected array $closingDirectives = [];
-    protected array $canCompile = [];
+    private array $openingDirectives = [];
+    private array $closingDirectives = [];
+
+    public function __construct() {
+        $this->closingDirectives = $this->getDirectives(function($directiveName) {
+            return str_starts_with($directiveName, 'end');
+        });
+
+        $this->openingDirectives = $this->getDirectives(function($directiveName) {
+            if (empty($this->closingDirectives)) {
+                return true;
+            }
+
+            return in_array('end' . $directiveName, $this->closingDirectives);
+        });
+    }
 
     public function canCompile(DirectiveNode $directive) : bool {
-        return (in_array($directive->getName(), $this->canCompile) || 
-               in_array($directive->getName(), $this->closingDirectives)) &&
-               !in_array($directive->getName(), $this->openingDirectives);
+        return $this->hasOptionalDirective($directive->getName()) || 
+               $this->hasClosingDirective($directive->getName());
     }
 
     public function validateContext(DirectiveNode $directive, array $directiveStack) : bool {
@@ -24,11 +36,17 @@ abstract class DirectiveCompiler {
     }
 
     public function hasClosingDirective(string $directiveName) : bool {
+        // "Self closing" directives like @continue @style...
         if (empty($this->closingDirectives)) {
-            return in_array($directiveName, $this->openingDirectives);
+            return $this->hasOpeningDirective($directiveName);
         }
 
         return in_array($directiveName, $this->closingDirectives);
+    }
+
+    private function hasOptionalDirective(string $directiveName) : bool {
+        return method_exists($this, 'compile' . $directiveName) && 
+               !method_exists($this, 'compileend' . $directiveName);
     }
 
     public function getOpeningDirectives() : array {
@@ -43,5 +61,19 @@ abstract class DirectiveCompiler {
         return 'end' . $directiveName;
     }
 
-    abstract public function compile(DirectiveNode $directive) : ?string;
+    public function compile(DirectiveNode $directive) : string {
+        return $this->{'compile' . $directive->getName()}($directive);
+    }
+
+    private function getDirectives(\Closure $callback) : array {
+        $methods = array_filter(get_class_methods($this::class), function($methodName) {
+            return str_starts_with($methodName, 'compile') && $methodName !== 'compile';
+        });
+
+        $directives = array_map(function($method) {
+            return strtolower(str_replace('compile', '', $method));
+        }, $methods);
+
+        return array_filter($directives, $callback);
+    }
 }

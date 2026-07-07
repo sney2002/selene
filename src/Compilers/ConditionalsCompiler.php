@@ -4,36 +4,43 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 class ConditionalsCompiler extends DirectiveCompiler {
-    protected array $openingDirectives = ['if', 'unless', 'isset', 'empty'];
-    protected array $closingDirectives = ['endif', 'endunless', 'endisset', 'endempty'];
-    protected array $canCompile = ['elseif', 'else'];
+    public function compileIf(DirectiveNode $node) : string {
+        return '<?php if (' . $node->getParameters() . '): ?>';
+    }
 
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'if':
-                return '<?php if (' . $directive->getParameters() . '): ?>';
-            case 'elseif':
-                return '<?php elseif (' . $directive->getParameters() . '): ?>';
-            case 'else':
-                return '<?php else: ?>';
-            case 'unless':
-                return '<?php if (! (' . $directive->getParameters() . ')): ?>';
-            case 'isset':
-                return '<?php if (isset(' . $directive->getParameters() . ')): ?>';
-            case 'empty':
-                // This must be the @empty of a @forelse loop
-                if (! $directive->getParameters()) {
-                    return null;
-                }
+    public function compileElseif(DirectiveNode $node) : string {
+        return '<?php elseif (' . $node->getParameters() . '): ?>';
+    }
 
-                return '<?php if (empty(' . $directive->getParameters() . ')): ?>';
-            case 'endunless':
-            case 'endempty':
-            case 'endisset':
-            case 'endif':
-                return '<?php endif; ?>';
-        }
+    public function compileElse(DirectiveNode $node) : string {
+        return '<?php else: ?>';
+    }
 
-        return null;
+    public function compileUnless(DirectiveNode $node) : string {
+        return '<?php if (! (' . $node->getParameters() . ')): ?>';
+    }
+    
+    public function compileIsset(DirectiveNode $node) : string {
+        return '<?php if (isset(' . $node->getParameters() . ')): ?>';
+    }
+
+    public function compileEmpty(DirectiveNode $node) : string {
+        return '<?php if (empty(' . $node->getParameters() . ')): ?>';
+    }
+
+    public function compileEndunless(DirectiveNode $node) : string {
+        return '<?php endif; ?>';
+    }
+
+    public function compileEndisset(DirectiveNode $node) : string {
+        return '<?php endif; ?>';
+    }
+
+    public function compileEndempty(DirectiveNode $node) : string {
+        return '<?php endif; ?>';
+    }
+
+    public function compileEndif(DirectiveNode $node) : string {
+        return '<?php endif; ?>';
     }
 }

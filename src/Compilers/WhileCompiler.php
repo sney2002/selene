@@ -5,17 +5,11 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 class WhileCompiler extends LoopCompiler {
-    protected array $openingDirectives = ['while'];
-    protected array $closingDirectives = ['endwhile'];
+    public function compileWhile(DirectiveNode $node) : string {
+        return '<?php while (' . $node->getParameters() . '): ?>';
+    }
 
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'while':
-                return '<?php while (' . $directive->getParameters() . '): ?>';
-            case 'endwhile':
-                return '<?php endwhile; ?>';
-        }
-
-        return null;
+    public function compileEndwhile(DirectiveNode $node) : string {
+        return '<?php endwhile; ?>';
     }
 }

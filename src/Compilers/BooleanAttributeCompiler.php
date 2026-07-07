@@ -5,23 +5,29 @@ use Selene\Nodes\DirectiveNode;
 
 class BooleanAttributeCompiler extends DirectiveCompiler
 {
-    protected array $openingDirectives = ['checked', 'selected', 'disabled', 'readonly', 'required'];
-
-    public function compile(DirectiveNode $node) : string
+    public function compileChecked(DirectiveNode $node) : string
     {
-        switch ($node->getName()) {
-            case 'checked':
-                return "<?php if ({$node->getParameters()}): echo 'checked'; endif; ?>";
-            case 'selected':
-                return "<?php if ({$node->getParameters()}): echo 'selected'; endif; ?>";
-            case 'disabled':
-                return "<?php if ({$node->getParameters()}): echo 'disabled'; endif; ?>";
-            case 'readonly':
-                return "<?php if ({$node->getParameters()}): echo 'readonly'; endif; ?>";
-            case 'required':
-                return "<?php if ({$node->getParameters()}): echo 'required'; endif; ?>";
-            default:
-                return '';
-        }
+        return "<?php if ({$node->getParameters()}): echo 'checked'; endif; ?>";
+    }
+
+    public function compileSelected(DirectiveNode $node) : string
+    {
+        return "<?php if ({$node->getParameters()}): echo 'selected'; endif; ?>";
+    }
+    
+    public function compileDisabled(DirectiveNode $node) : string
+    {
+        return "<?php if ({$node->getParameters()}): echo 'disabled'; endif; ?>";
+    }
+
+    public function compileReadonly(DirectiveNode $node) : string
+    {
+        return "<?php if ({$node->getParameters()}): echo 'readonly'; endif; ?>";
+    }
+    
+    
+    public function compileRequired(DirectiveNode $node) : string
+    {
+        return "<?php if ({$node->getParameters()}): echo 'required'; endif; ?>";
     }
 }

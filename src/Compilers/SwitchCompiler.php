@@ -5,34 +5,33 @@ namespace Selene\Compilers;
 use Selene\Nodes\DirectiveNode;
 
 class SwitchCompiler extends DirectiveCompiler {
-    protected array $openingDirectives = ['switch'];
-    protected array $closingDirectives = ['endswitch'];
-    protected array $canCompile = ['case', 'break', 'default'];
-
     private array $switchStack = [];
 
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'switch':
-                $this->switchStart();
-                return '<?php switch (' . $directive->getParameters() . '):';
-            case 'case':
-                if ($this->isFirstCase()) { 
-                    $this->setFirstCase(false);
-                    return 'case (' . $directive->getParameters() . '): ?>';
-                }
+    public function compileSwitch(DirectiveNode $node) : string {
+        $this->switchStart();
+        return '<?php switch (' . $node->getParameters() . '):';
+    }
 
-                return '<?php case (' . $directive->getParameters() . '): ?>';
-            case 'break':
-                return '<?php break; ?>';
-            case 'default':
-                return '<?php default: ?>';
-            case 'endswitch':
-                $this->switchEnd();
-                return '<?php endswitch; ?>';
+    public function compileCase(DirectiveNode $node) : string {
+        if ($this->isFirstCase()) { 
+            $this->setFirstCase(false);
+            return 'case (' . $node->getParameters() . '): ?>';
         }
 
-        return null;
+        return '<?php case (' . $node->getParameters() . '): ?>';
+    }
+
+    public function compileBreak(DirectiveNode $node) : string {
+        return '<?php break; ?>';
+    }
+
+    public function compileDefault(DirectiveNode $node) : string {
+        return '<?php default: ?>';
+    }
+
+    public function compileEndswitch(DirectiveNode $node) : string {
+        $this->switchEnd();
+        return '<?php endswitch; ?>';
     }
 
     private function switchStart() : void {

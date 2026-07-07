@@ -6,9 +6,22 @@ use Selene\Nodes\DirectiveNode;
 
 class ForelseCompiler extends LoopCompiler {
     protected array $hasEmptyStack = [];
-    protected array $openingDirectives = ['forelse'];
-    protected array $closingDirectives = ['endforelse'];
-    protected array $canRender = ['empty'];
+
+    public function compileForelse(DirectiveNode $node) : string {
+        $this->foreachStart();
+        $iterable = explode(' as ', $node->getParameters())[0];
+        return '<?php if (!empty(' . trim($iterable) . ')): foreach (' . $node->getParameters() . '): ?>';
+    }
+
+    public function compileEmpty(DirectiveNode $node) : string {
+        $this->emptyFound();
+        return '<?php endforeach; else: ?>';
+    }
+
+    public function compileEndforelse(DirectiveNode $node) : string {
+        $this->foreachEnd();
+        return '<?php endif; ?>';
+    }
 
     public function getExpected(string $directiveName) : string {
         if ($this->hasEmpty()) {
@@ -27,24 +40,11 @@ class ForelseCompiler extends LoopCompiler {
             return !$directive->getParameters();
         }
 
-        return parent::canCompile($directive);
-    }
-
-    public function compile(DirectiveNode $directive) : ?string {
-        switch ($directive->getName()) {
-            case 'forelse':
-                $this->foreachStart();
-                $iterable = explode(' as ', $directive->getParameters())[0];
-                return '<?php if (!empty(' . trim($iterable) . ')): foreach (' . $directive->getParameters() . '): ?>';
-            case 'empty':
-                $this->emptyFound();
-                return '<?php endforeach; else: ?>';
-            case 'endforelse':
-                $this->foreachEnd();
-                return '<?php endif; ?>';
+        if ($directive->getName() === 'endforelse') {
+            return $this->hasEmpty();
         }
 
-        return null;
+        return parent::canCompile($directive);
     }
 
     private function foreachStart() : void {
