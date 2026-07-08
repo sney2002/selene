@@ -6,7 +6,10 @@
     "autoload": {
         "psr-4": {
             "Selene\\": "src/"
-        }
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
