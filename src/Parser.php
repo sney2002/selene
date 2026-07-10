@@ -174,7 +174,7 @@ class Parser
 
         $name = $this->getContentWhile(self::ALPHA);
 
-        $this->consumeUntilAny(["\n", self::PRINTABLE]);
+        $this->consumeUntilAny(["\r", "\n", self::PRINTABLE]);
 
         $parameters = $this->current() === '(' ? $this->getParenthesesContent() : '';
 
