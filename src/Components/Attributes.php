@@ -43,6 +43,18 @@ class Attributes implements Stringable {
     }
 
     /**
+     * Remove an attribute
+     * 
+     * @param string $name
+     * @return self
+     */
+    public function forget(string $name) : self
+    {
+        unset($this->attributes[$name]);
+        return $this;
+    }
+
+    /**
      * Conditionally merge classes
      * 
      * @param array $classes

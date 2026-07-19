@@ -150,6 +150,14 @@ describe('only', function() {
     });
 });
 
+describe('forget', function() {
+    test('Removes an attribute', function() {
+        $attributes = new Attributes(['id' => 'hello', 'class' => 'world']);
+        $attributes->forget('id');
+        expect($attributes->all())->toBe(['class' => 'world']);
+    });
+});
+
 describe('__toString', function() {
     test('Returns a string of the attributes', function() {
         $attributes = new Attributes(['id' => 'hello', 'class' => 'world']);
